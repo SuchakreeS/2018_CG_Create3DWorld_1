@@ -79,7 +79,6 @@
       <AdditionalIncludeDirectories>C:\Libraries\GMTL\gmtl-0.6.1;C:\Libraries\freeglut\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>D:\Files\Work\ICT\Year 3-2\CG\Resources\freeglut\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalLibraryDirectories>C:\Libraries\freeglut\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
