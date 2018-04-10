@@ -475,18 +475,10 @@ void DrawCoordinateFrame(const float l)
 }
 
 //|____________________________________________________________________
-//|
-//| Function: DrawPlane
-//|
-//! \param width       [in] Width  of the plane.
-//! \param length      [in] Length of the plane.
-//! \param height      [in] Height of the plane.
-//! \return None.
-//!
-//! Draws the plane.
+//! Draws Cat Body.
 //|____________________________________________________________________
 
-void DrawPlane(const float width, const float length, const float height)
+void DrawCatBody(const float width, const float length, const float height)
 {
 	float x = -width * 0.15f;
 	float y = width * 0.02f;
@@ -498,11 +490,6 @@ void DrawPlane(const float width, const float length, const float height)
 	float z2 = 0;
 	float scal2 = width * 0.50f;
 
-	/*
-	glBegin(GL_TRIANGLES);
-	glBegin(GL_QUAD_STRIP);
-	*/
-	//------Right--------------------------------------------
 	glColor3f(0.31f, 0.13f, 0.33f);
 	// R1
 	glBegin(GL_QUAD_STRIP);
@@ -511,36 +498,14 @@ void DrawPlane(const float width, const float length, const float height)
 	glVertex3f((0.05 * scal) + x, (0.00 * scal) + y, (0.05 * scal) + z);
 	glVertex3f((0.05 * scal) + x, (0.00 * scal) + y, (0.39 * scal) + z);
 	glEnd();
-	// R2 
+	// R2
 	glBegin(GL_QUAD_STRIP);
 	glVertex3f((0.14 * scal) + x, (0.53 * scal) + y, (0.16 * scal) + z);
 	glVertex3f((0.14 * scal) + x, (0.53 * scal) + y, (0.28 * scal) + z);
 	glVertex3f((0.00 * scal) + x, (0.10 * scal) + y, (0.00 * scal) + z);
 	glVertex3f((0.00 * scal) + x, (0.10 * scal) + y, (0.44 * scal) + z);
 	glEnd();
-	// R3
-	glBegin(GL_QUAD_STRIP);
-	glVertex3f((0.00 * scal) + x, (0.64 * scal) + y, (0.09 * scal) + z);
-	glVertex3f((0.00 * scal) + x, (0.64 * scal) + y, (0.35 * scal) + z);
-	glVertex3f((0.14 * scal) + x, (0.53 * scal) + y, (0.16 * scal) + z);
-	glVertex3f((0.14 * scal) + x, (0.53 * scal) + y, (0.28 * scal) + z);
-	glEnd();
-	// R4
-	glBegin(GL_QUAD_STRIP);
-	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
-	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.35 * scal) + z);
-	glVertex3f((0.00 * scal) + x, (0.64 * scal) + y, (0.09 * scal) + z);
-	glVertex3f((0.00 * scal) + x, (0.64 * scal) + y, (0.35 * scal) + z);
-	glEnd();
-	// R5
-	glBegin(GL_TRIANGLES);
-	glVertex3f((-0.03 * scal) + x, (1.00 * scal) + y, (0.22 * scal) + z);
-	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
-	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.35 * scal) + z);
-	glEnd();
 
-	//------Back--------------------------------------------
-	glColor3f(0.31f, 0.13f, 0.33f);
 	// B6
 	glBegin(GL_QUAD_STRIP);
 	glVertex3f((0.00 * scal) + x, (0.10 * scal) + y, (0.00 * scal) + z);
@@ -555,42 +520,7 @@ void DrawPlane(const float width, const float length, const float height)
 	glVertex3f((0.00 * scal) + x, (0.10 * scal) + y, (0.00 * scal) + z);
 	glVertex3f((0.44 * scal) + x, (0.10 * scal) + y, (0.00 * scal) + z);
 	glEnd();
-	// B8
-	glBegin(GL_QUAD_STRIP);
-	glVertex3f((0.00 * scal) + x, (0.64 * scal) + y, (0.09 * scal) + z);
-	glVertex3f((0.44 * scal) + x, (0.64 * scal) + y, (0.09 * scal) + z);
-	glVertex3f((0.14 * scal) + x, (0.53 * scal) + y, (0.16 * scal) + z);
-	glVertex3f((0.30 * scal) + x, (0.53 * scal) + y, (0.16 * scal) + z);
-	glEnd();
-	// B9
-	glBegin(GL_QUAD_STRIP);
-	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
-	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
-	glVertex3f((0.00 * scal) + x, (0.64 * scal) + y, (0.09 * scal) + z);
-	glVertex3f((0.44 * scal) + x, (0.64 * scal) + y, (0.09 * scal) + z);
-	glEnd();
-	// B10
-	glBegin(GL_TRIANGLES);
-	glVertex3f((-0.03 * scal) + x, (1.00 * scal) + y, (0.22 * scal) + z);
-	glVertex3f((0.14 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
-	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
-	glEnd();
-	// B11
-	glBegin(GL_QUAD_STRIP);
-	glVertex3f((0.14 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
-	glVertex3f((0.30 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
-	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
-	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
-	glEnd();
-	// B12
-	glBegin(GL_TRIANGLES);
-	glVertex3f((0.47 * scal) + x, (1.00 * scal) + y, (0.22 * scal) + z);
-	glVertex3f((0.30 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
-	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
-	glEnd();
 
-	//------Left--------------------------------------------
-	glColor3f(0.31f, 0.13f, 0.33f);
 	// L15
 	glBegin(GL_QUAD_STRIP);
 	glVertex3f((0.44 * scal) + x, (0.10 * scal) + y, (0.00 * scal) + z);
@@ -598,36 +528,14 @@ void DrawPlane(const float width, const float length, const float height)
 	glVertex3f((0.37 * scal) + x, (0.00 * scal) + y, (0.05 * scal) + z);
 	glVertex3f((0.37 * scal) + x, (0.00 * scal) + y, (0.39 * scal) + z);
 	glEnd();
-	// L16 
+	// L16
 	glBegin(GL_QUAD_STRIP);
 	glVertex3f((0.30 * scal) + x, (0.53 * scal) + y, (0.16 * scal) + z);
 	glVertex3f((0.30 * scal) + x, (0.53 * scal) + y, (0.28 * scal) + z);
 	glVertex3f((0.44 * scal) + x, (0.10 * scal) + y, (0.00 * scal) + z);
 	glVertex3f((0.44 * scal) + x, (0.10 * scal) + y, (0.44 * scal) + z);
 	glEnd();
-	// L17
-	glBegin(GL_QUAD_STRIP);
-	glVertex3f((0.44 * scal) + x, (0.64 * scal) + y, (0.09 * scal) + z);
-	glVertex3f((0.44 * scal) + x, (0.64 * scal) + y, (0.35 * scal) + z);
-	glVertex3f((0.30 * scal) + x, (0.53 * scal) + y, (0.16 * scal) + z);
-	glVertex3f((0.30 * scal) + x, (0.53 * scal) + y, (0.28 * scal) + z);
-	glEnd();
-	// L18
-	glBegin(GL_QUAD_STRIP);
-	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
-	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.35 * scal) + z);
-	glVertex3f((0.44 * scal) + x, (0.64 * scal) + y, (0.09 * scal) + z);
-	glVertex3f((0.44 * scal) + x, (0.64 * scal) + y, (0.35 * scal) + z);
-	glEnd();
-	// L19
-	glBegin(GL_TRIANGLES);
-	glVertex3f((0.47 * scal) + x, (1.00 * scal) + y, (0.22 * scal) + z);
-	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
-	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.35 * scal) + z);
-	glEnd();
 
-	//------Front--------------------------------------------
-	glColor3f(0.31f, 0.13f, 0.33f);
 	// B20
 	glBegin(GL_QUAD_STRIP);
 	glVertex3f((0.00 * scal) + x, (0.10 * scal) + y, (0.44 * scal) + z);
@@ -642,6 +550,96 @@ void DrawPlane(const float width, const float length, const float height)
 	glVertex3f((0.00 * scal) + x, (0.10 * scal) + y, (0.44 * scal) + z);
 	glVertex3f((0.44 * scal) + x, (0.10 * scal) + y, (0.44 * scal) + z);
 	glEnd();
+
+	//------Down--------------------------------------------
+	glColor3f(0.31f, 0.13f, 0.33f);
+	glBegin(GL_QUAD_STRIP);
+	glVertex3f((0.05 * scal) + x, (0.00 * scal) + y, (0.05 * scal) + z);
+	glVertex3f((0.37 * scal) + x, (0.00 * scal) + y, (0.05 * scal) + z);
+	glVertex3f((0.05 * scal) + x, (0.00 * scal) + y, (0.39 * scal) + z);
+	glVertex3f((0.37 * scal) + x, (0.00 * scal) + y, (0.39 * scal) + z);
+	glEnd();
+
+	//------Up body--------------------------------------------
+	glBegin(GL_QUAD_STRIP);
+	glVertex3f((0.14 * scal) + x, (0.53 * scal) + y, (0.16 * scal) + z);
+	glVertex3f((0.14 * scal) + x, (0.53 * scal) + y, (0.28 * scal) + z);
+	glVertex3f((0.30 * scal) + x, (0.53 * scal) + y, (0.16 * scal) + z);
+	glVertex3f((0.30 * scal) + x, (0.53 * scal) + y, (0.28 * scal) + z);
+	glEnd();
+
+}
+
+//|____________________________________________________________________
+//! Draws Cat Head.
+//|____________________________________________________________________
+
+void DrawCatHead(const float width, const float length, const float height)
+{
+	float x = -width * 0.15f;
+	float y = width * 0.02f;
+	float z = width * 0.25f;
+	float scal = width * 0.75f;
+
+	float x2 = 0;
+	float y2 = 0;
+	float z2 = 0;
+	float scal2 = width * 0.50f;
+
+	glColor3f(0.31f, 0.13f, 0.33f);
+	// R3
+	glBegin(GL_QUAD_STRIP);
+	glVertex3f((0.00 * scal) + x, (0.64 * scal) + y, (0.09 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.64 * scal) + y, (0.35 * scal) + z);
+	glVertex3f((0.14 * scal) + x, (0.53 * scal) + y, (0.16 * scal) + z);
+	glVertex3f((0.14 * scal) + x, (0.53 * scal) + y, (0.28 * scal) + z);
+	glEnd();
+	// R4
+	glBegin(GL_QUAD_STRIP);
+	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.35 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.64 * scal) + y, (0.09 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.64 * scal) + y, (0.35 * scal) + z);
+	glEnd();
+
+	// B8
+	glBegin(GL_QUAD_STRIP);
+	glVertex3f((0.00 * scal) + x, (0.64 * scal) + y, (0.09 * scal) + z);
+	glVertex3f((0.44 * scal) + x, (0.64 * scal) + y, (0.09 * scal) + z);
+	glVertex3f((0.14 * scal) + x, (0.53 * scal) + y, (0.16 * scal) + z);
+	glVertex3f((0.30 * scal) + x, (0.53 * scal) + y, (0.16 * scal) + z);
+	glEnd();
+	// B9
+	glBegin(GL_QUAD_STRIP);
+	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
+	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.64 * scal) + y, (0.09 * scal) + z);
+	glVertex3f((0.44 * scal) + x, (0.64 * scal) + y, (0.09 * scal) + z);
+	glEnd();
+
+	// B11
+	glBegin(GL_QUAD_STRIP);
+	glVertex3f((0.14 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
+	glVertex3f((0.30 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
+	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
+	glEnd();
+
+	// L17
+	glBegin(GL_QUAD_STRIP);
+	glVertex3f((0.44 * scal) + x, (0.64 * scal) + y, (0.09 * scal) + z);
+	glVertex3f((0.44 * scal) + x, (0.64 * scal) + y, (0.35 * scal) + z);
+	glVertex3f((0.30 * scal) + x, (0.53 * scal) + y, (0.16 * scal) + z);
+	glVertex3f((0.30 * scal) + x, (0.53 * scal) + y, (0.28 * scal) + z);
+	glEnd();
+	// L18
+	glBegin(GL_QUAD_STRIP);
+	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
+	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.35 * scal) + z);
+	glVertex3f((0.44 * scal) + x, (0.64 * scal) + y, (0.09 * scal) + z);
+	glVertex3f((0.44 * scal) + x, (0.64 * scal) + y, (0.35 * scal) + z);
+	glEnd();
+
 	// B22
 	glBegin(GL_QUAD_STRIP);
 	glVertex3f((0.00 * scal) + x, (0.64 * scal) + y, (0.35 * scal) + z);
@@ -663,6 +661,96 @@ void DrawPlane(const float width, const float length, const float height)
 	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.35 * scal) + z);
 	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.35 * scal) + z);
 	glEnd();
+
+	// Eye left
+	glColor3f(0.00f, 0.00f, 0.00f);
+	glBegin(GL_QUAD_STRIP);
+	glVertex3f((0.12 * scal) + x, (0.80 * scal) + y, (0.36 * scal) + z);
+	glVertex3f((0.14 * scal) + x, (0.80 * scal) + y, (0.36 * scal) + z);
+	glVertex3f((0.12 * scal) + x, (0.75 * scal) + y, (0.36 * scal) + z);
+	glVertex3f((0.14 * scal) + x, (0.75 * scal) + y, (0.36 * scal) + z);
+	glEnd();
+
+	// Eye right
+	glBegin(GL_QUAD_STRIP);
+	glVertex3f((0.30 * scal) + x, (0.80 * scal) + y, (0.36 * scal) + z);
+	glVertex3f((0.32 * scal) + x, (0.80 * scal) + y, (0.36 * scal) + z);
+	glVertex3f((0.30 * scal) + x, (0.75 * scal) + y, (0.36 * scal) + z);
+	glVertex3f((0.32 * scal) + x, (0.75 * scal) + y, (0.36 * scal) + z);
+	glEnd();
+
+	glColor3f(0.31f, 0.13f, 0.33f);
+	// Up head
+	glBegin(GL_QUAD_STRIP);
+	glVertex3f((0.14 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
+	glVertex3f((0.30 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
+	glVertex3f((0.14 * scal) + x, (0.94 * scal) + y, (0.28 * scal) + z);
+	glVertex3f((0.30 * scal) + x, (0.94 * scal) + y, (0.28 * scal) + z);
+	glEnd();
+
+	// Up head Left
+	glBegin(GL_QUAD_STRIP);
+	glVertex3f((0.14 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
+	glVertex3f((0.14 * scal) + x, (0.94 * scal) + y, (0.28 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.35 * scal) + z);
+	glEnd();
+
+	// Up head Right
+	glBegin(GL_QUAD_STRIP);
+	glVertex3f((0.30 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
+	glVertex3f((0.30 * scal) + x, (0.94 * scal) + y, (0.28 * scal) + z);
+	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
+	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.35 * scal) + z);
+	glEnd();
+
+}
+
+//|____________________________________________________________________
+//! Draws Cat Ear.
+//|____________________________________________________________________
+
+void DrawCatEar(const float width, const float length, const float height)
+{
+	float x = -width * 0.15f;
+	float y = width * 0.02f;
+	float z = width * 0.25f;
+	float scal = width * 0.75f;
+
+	float x2 = 0;
+	float y2 = 0;
+	float z2 = 0;
+	float scal2 = width * 0.50f;
+
+	glColor3f(0.31f, 0.13f, 0.33f);
+	// R5
+	glBegin(GL_TRIANGLES);
+	glVertex3f((-0.03 * scal) + x, (1.00 * scal) + y, (0.22 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.35 * scal) + z);
+	glEnd();
+
+	// B10
+	glBegin(GL_TRIANGLES);
+	glVertex3f((-0.03 * scal) + x, (1.00 * scal) + y, (0.22 * scal) + z);
+	glVertex3f((0.14 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
+	glEnd();
+
+	// B12
+	glBegin(GL_TRIANGLES);
+	glVertex3f((0.47 * scal) + x, (1.00 * scal) + y, (0.22 * scal) + z);
+	glVertex3f((0.30 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
+	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
+	glEnd();
+
+	// L19
+	glBegin(GL_TRIANGLES);
+	glVertex3f((0.47 * scal) + x, (1.00 * scal) + y, (0.22 * scal) + z);
+	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
+	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.35 * scal) + z);
+	glEnd();
+
 	// B25
 	glBegin(GL_TRIANGLES);
 	glVertex3f((-0.03 * scal) + x, (1.00 * scal) + y, (0.22 * scal) + z);
@@ -688,61 +776,57 @@ void DrawPlane(const float width, const float length, const float height)
 	glVertex3f((0.33 * scal) + x, (0.91 * scal) + y, (0.29 * scal) + z);
 	glVertex3f((0.41 * scal) + x, (0.88 * scal) + y, (0.34 * scal) + z);
 	glEnd();
-	// Eye left
-	glColor3f(0.00f, 0.00f, 0.00f);
-	glBegin(GL_QUAD_STRIP);
-	glVertex3f((0.12 * scal) + x, (0.80 * scal) + y, (0.36 * scal) + z);
-	glVertex3f((0.14 * scal) + x, (0.80 * scal) + y, (0.36 * scal) + z);
-	glVertex3f((0.12 * scal) + x, (0.75 * scal) + y, (0.36 * scal) + z);
-	glVertex3f((0.14 * scal) + x, (0.75 * scal) + y, (0.36 * scal) + z);
-	glEnd();
 
-	// Eye right
-	glBegin(GL_QUAD_STRIP);
-	glVertex3f((0.30 * scal) + x, (0.80 * scal) + y, (0.36 * scal) + z);
-	glVertex3f((0.32 * scal) + x, (0.80 * scal) + y, (0.36 * scal) + z);
-	glVertex3f((0.30 * scal) + x, (0.75 * scal) + y, (0.36 * scal) + z);
-	glVertex3f((0.32 * scal) + x, (0.75 * scal) + y, (0.36 * scal) + z);
-	glEnd();
-	//------Up--------------------------------------------
-	glColor3f(0.31f, 0.13f, 0.33f);
-	// B24
-	glBegin(GL_QUAD_STRIP);
-	glVertex3f((0.14 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
-	glVertex3f((0.30 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
-	glVertex3f((0.14 * scal) + x, (0.94 * scal) + y, (0.28 * scal) + z);
-	glVertex3f((0.30 * scal) + x, (0.94 * scal) + y, (0.28 * scal) + z);
-	glEnd();
 
-	// B25
+	// Up ear left
 	glBegin(GL_TRIANGLES);
 	glVertex3f((-0.03 * scal) + x, (1.00 * scal) + y, (0.22 * scal) + z);
 	glVertex3f((0.14 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
 	glVertex3f((0.14 * scal) + x, (0.94 * scal) + y, (0.28 * scal) + z);
 	glEnd();
-	// B26
+	// Up ear right
 	glBegin(GL_TRIANGLES);
 	glVertex3f((0.47 * scal) + x, (1.00 * scal) + y, (0.22 * scal) + z);
 	glVertex3f((0.30 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
 	glVertex3f((0.30 * scal) + x, (0.94 * scal) + y, (0.28 * scal) + z);
 	glEnd();
 
-	//------Down--------------------------------------------
-	glColor3f(0.31f, 0.13f, 0.33f);
+	// Up head Left
 	glBegin(GL_QUAD_STRIP);
-	glVertex3f((0.05 * scal) + x, (0.00 * scal) + y, (0.05 * scal) + z);
-	glVertex3f((0.37 * scal) + x, (0.00 * scal) + y, (0.05 * scal) + z);
-	glVertex3f((0.05 * scal) + x, (0.00 * scal) + y, (0.39 * scal) + z);
-	glVertex3f((0.37 * scal) + x, (0.00 * scal) + y, (0.39 * scal) + z);
+	glVertex3f((0.14 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
+	glVertex3f((0.14 * scal) + x, (0.94 * scal) + y, (0.28 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.35 * scal) + z);
 	glEnd();
 
+	// Up head Right
+	glBegin(GL_QUAD_STRIP);
+	glVertex3f((0.30 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
+	glVertex3f((0.30 * scal) + x, (0.94 * scal) + y, (0.28 * scal) + z);
+	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
+	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.35 * scal) + z);
+	glEnd();
+
+}
+
+//|____________________________________________________________________
+//! Draws Broom.
+//|____________________________________________________________________
+
+void DrawBroom(const float width, const float length, const float height)
+{
+	float x = -width * 0.15f;
+	float y = width * 0.02f;
+	float z = width * 0.25f;
+	float scal = width * 0.75f;
+
+	float x2 = 0;
+	float y2 = 0;
+	float z2 = 0;
+	float scal2 = width * 0.50f;
 
 	//------- Meaw -----------------------------------------
-
-
-	//glScalef(1.0, 2.0f, 1);
 	glBegin(GL_TRIANGLES);
-	// (-0.05, 0.05, 8) (0.05, 0.05, 8) (0.08, 0, 8) (0.05, -0.05, 8) (-0.05, -0.05, 8) (-0.08, 0, 8)
 	glColor3f(0.2f, 0.1f, 0.0f);
 	glVertex3f((0.05 * scal2) + x2, (0.05 * scal2) + y2, (2 * scal2) + z2);
 	glVertex3f((0.05 * scal2) + x2, (-0.05 * scal2) + y2, (2 * scal2) + z2);
@@ -1009,7 +1093,202 @@ void DrawPlane(const float width, const float length, const float height)
 	glVertex3f((-0.23 * scal2) + x2, (-0.13 * scal2) + y2, (-0.9 * scal2) + z2);	// 7
 
 	glEnd();
-	//------- Meaw -----------------------------------------
+
+}
+
+//|____________________________________________________________________
+//! Draws Plane.
+//|____________________________________________________________________
+
+void DrawPlane(const float width, const float length, const float height)
+{
+	float x = -width * 0.15f;
+	float y = width * 0.02f;
+	float z = width * 0.25f;
+	float scal = width * 0.75f;
+
+	float x2 = 0;
+	float y2 = 0;
+	float z2 = 0;
+	float scal2 = width * 0.50f;
+
+
+	glColor3f(0.2f, 0.1f, 0.0f);
+	//1
+	glBegin(GL_TRIANGLES);
+	glVertex3f((0.00 * scal) + x, (0.00 * scal) + y, (0.20 * scal) + z);
+	glVertex3f((0.20 * scal) + x, (0.00 * scal) + y, (0.20 * scal) + z);
+	glVertex3f((0.10 * scal) + x, (-0.40 * scal) + y, (0.10 * scal) + z);
+	glEnd();
+
+	//2
+	glBegin(GL_TRIANGLES);
+	glVertex3f((0.10 * scal) + x, (0.10 * scal) + y, (0.30 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.00 * scal) + y, (0.20 * scal) + z);
+	glVertex3f((0.20 * scal) + x, (0.00 * scal) + y, (0.20 * scal) + z);
+	glEnd();
+
+	//3
+	glBegin(GL_TRIANGLES);
+	glVertex3f((-0.10 * scal) + x, (0.10 * scal) + y, (0.10 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.20 * scal) + y, (0.20 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.00 * scal) + y, (0.20 * scal) + z);
+	glEnd();
+
+	//4
+	glBegin(GL_TRIANGLES);
+	glVertex3f((0.00 * scal) + x, (0.20 * scal) + y, (0.20 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.00 * scal) + y, (0.20 * scal) + z);
+	glVertex3f((0.10 * scal) + x, (0.10 * scal) + y, (0.30 * scal) + z);
+	glEnd();
+
+	//5
+	glBegin(GL_TRIANGLES);
+	glVertex3f((0.10 * scal) + x, (0.10 * scal) + y, (0.30 * scal) + z);
+	glVertex3f((0.20 * scal) + x, (0.20 * scal) + y, (0.20 * scal) + z);
+	glVertex3f((0.20 * scal) + x, (0.00 * scal) + y, (0.20 * scal) + z);
+	glEnd();
+
+	//6
+	glBegin(GL_TRIANGLES);
+	glVertex3f((0.00 * scal) + x, (0.20 * scal) + y, (0.20 * scal) + z);
+	glVertex3f((0.20 * scal) + x, (0.20 * scal) + y, (0.20 * scal) + z);
+	glVertex3f((0.10 * scal) + x, (0.10 * scal) + y, (0.30 * scal) + z);
+	glEnd();
+
+	//7
+	glBegin(GL_TRIANGLES);
+	glVertex3f((0.20 * scal) + x, (0.20 * scal) + y, (0.20 * scal) + z);
+	glVertex3f((0.30 * scal) + x, (0.10 * scal) + y, (0.10 * scal) + z);
+	glVertex3f((0.20 * scal) + x, (0.00 * scal) + y, (0.20 * scal) + z);
+	glEnd();
+
+	//8
+	glBegin(GL_TRIANGLES);
+	glVertex3f((0.10 * scal) + x, (0.60 * scal) + y, (0.10 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.20 * scal) + y, (0.20 * scal) + z);
+	glVertex3f((0.20 * scal) + x, (0.20 * scal) + y, (0.20 * scal) + z);
+	glEnd();
+
+
+	glColor3f(0.5f, 0.2f, 0.7f);
+
+	//9
+	glBegin(GL_TRIANGLES);
+	glVertex3f((0.00 * scal) + x, (0.00 * scal) + y, (0.00 * scal) + z);
+	glVertex3f((0.20 * scal) + x, (0.00 * scal) + y, (0.00 * scal) + z);
+	glVertex3f((0.10 * scal) + x, (-0.40 * scal) + y, (0.10 * scal) + z);
+	glEnd();
+
+	//10
+	glBegin(GL_TRIANGLES);
+	glVertex3f((0.10 * scal) + x, (0.10 * scal) + y, (-0.10 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.00 * scal) + y, (0.00 * scal) + z);
+	glVertex3f((0.20 * scal) + x, (0.00 * scal) + y, (0.00 * scal) + z);
+	glEnd();
+
+	//11
+	glBegin(GL_TRIANGLES);
+	glVertex3f((-0.10 * scal) + x, (0.10 * scal) + y, (0.10 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.20 * scal) + y, (0.00 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.00 * scal) + y, (0.00 * scal) + z);
+	glEnd();
+
+	//12
+	glBegin(GL_TRIANGLES);
+	glVertex3f((0.00 * scal) + x, (0.20 * scal) + y, (0.00 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.00 * scal) + y, (0.00 * scal) + z);
+	glVertex3f((0.10 * scal) + x, (0.10 * scal) + y, (-0.10 * scal) + z);
+	glEnd();
+
+	//13
+	glBegin(GL_TRIANGLES);
+	glVertex3f((0.10 * scal) + x, (0.10 * scal) + y, (-0.10 * scal) + z);
+	glVertex3f((0.20 * scal) + x, (0.20 * scal) + y, (0.00 * scal) + z);
+	glVertex3f((0.20 * scal) + x, (0.00 * scal) + y, (0.00 * scal) + z);
+	glEnd();
+
+	//14
+	glBegin(GL_TRIANGLES);
+	glVertex3f((0.00 * scal) + x, (0.20 * scal) + y, (0.00 * scal) + z);
+	glVertex3f((0.20 * scal) + x, (0.20 * scal) + y, (0.00 * scal) + z);
+	glVertex3f((0.10 * scal) + x, (0.10 * scal) + y, (-0.10 * scal) + z);
+	glEnd();
+
+	//15
+	glBegin(GL_TRIANGLES);
+	glVertex3f((0.20 * scal) + x, (0.20 * scal) + y, (0.00 * scal) + z);
+	glVertex3f((0.30 * scal) + x, (0.10 * scal) + y, (0.10 * scal) + z);
+	glVertex3f((0.20 * scal) + x, (0.00 * scal) + y, (0.00 * scal) + z);
+	glEnd();
+
+	//16
+	glBegin(GL_TRIANGLES);
+	glVertex3f((0.10 * scal) + x, (0.60 * scal) + y, (0.10 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.20 * scal) + y, (0.00 * scal) + z);
+	glVertex3f((0.20 * scal) + x, (0.20 * scal) + y, (0.00 * scal) + z);
+	glEnd();
+
+	glColor3f(0.7f, 0.5f, 0.2f);
+
+	//17
+	glBegin(GL_TRIANGLES);
+	glVertex3f((0.20 * scal) + x, (0.00 * scal) + y, (0.20 * scal) + z);
+	glVertex3f((0.20 * scal) + x, (0.00 * scal) + y, (0.00 * scal) + z);
+	glVertex3f((0.10 * scal) + x, (-0.40 * scal) + y, (0.10 * scal) + z);
+	glEnd();
+
+	//18
+	glBegin(GL_TRIANGLES);
+	glVertex3f((0.30 * scal) + x, (0.10 * scal) + y, (0.10 * scal) + z);
+	glVertex3f((0.20 * scal) + x, (0.00 * scal) + y, (0.20 * scal) + z);
+	glVertex3f((0.20 * scal) + x, (0.00 * scal) + y, (0.00 * scal) + z);
+	glEnd();
+
+	//19
+	glBegin(GL_TRIANGLES);
+	glVertex3f((0.20 * scal) + x, (0.20 * scal) + y, (0.20 * scal) + z);
+	glVertex3f((0.20 * scal) + x, (0.20 * scal) + y, (0.00 * scal) + z);
+	glVertex3f((0.30 * scal) + x, (0.10 * scal) + y, (0.10 * scal) + z);
+	glEnd();
+
+	//20
+	glBegin(GL_TRIANGLES);
+	glVertex3f((0.10 * scal) + x, (0.60 * scal) + y, (0.10 * scal) + z);
+	glVertex3f((0.20 * scal) + x, (0.20 * scal) + y, (0.20 * scal) + z);
+	glVertex3f((0.20 * scal) + x, (0.20 * scal) + y, (0.00 * scal) + z);
+	glEnd();
+
+	//21
+	glBegin(GL_TRIANGLES);
+	glVertex3f((0.00 * scal) + x, (0.00 * scal) + y, (0.20 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.00 * scal) + y, (0.00 * scal) + z);
+	glVertex3f((0.10 * scal) + x, (-0.40 * scal) + y, (0.10 * scal) + z);
+	glEnd();
+
+	//22
+	glBegin(GL_TRIANGLES);
+	glVertex3f((-0.10 * scal) + x, (0.10 * scal) + y, (0.10 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.00 * scal) + y, (0.20 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.00 * scal) + y, (0.00 * scal) + z);
+	glEnd();
+
+	//23
+	glBegin(GL_TRIANGLES);
+	glVertex3f((0.00 * scal) + x, (0.20 * scal) + y, (0.20 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.20 * scal) + y, (0.00 * scal) + z);
+	glVertex3f((-0.10 * scal) + x, (0.10 * scal) + y, (0.10 * scal) + z);
+	glEnd();
+
+	//24
+	glBegin(GL_TRIANGLES);
+	glVertex3f((0.10 * scal) + x, (0.60 * scal) + y, (0.10 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.20 * scal) + y, (0.20 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.20 * scal) + y, (0.00 * scal) + z);
+	glEnd();
+
+
+
 }
 
 //|____________________________________________________________________

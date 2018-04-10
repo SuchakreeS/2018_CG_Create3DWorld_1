@@ -77,6 +77,6 @@ int main()
 	gmtl::Vec4f v_m = rot_mat * v;
 	std::cout << "p2 after local translation (using matrix) = " << p2 + v_m << std::endl;
 
-
+	getchar();
 	return 0;
 }

@@ -100,9 +100,9 @@ bool kmodifiers[3] = { false, false, false };
 // Cameras
 int cam_id = 0;                                // Selects which camera to view
 int camctrl_id = 0;                                // Selects which camera to control
-float distance[2] = { 20.0f,  20.0f };                 // Distance of the camera from world's origin.
-float elevation[2] = { -45.0f, -45.0f };                 // Elevation of the camera. (in degs)
-float azimuth[2] = { 15.0f,  15.0f };                 // Azimuth of the camera. (in degs)
+float distance[3] = { 20.0f,  20.0f,  20.0f };                 // Distance of the camera from world's origin.
+float elevation[3] = { -45.0f, -45.0f,  -45.0f };                 // Elevation of the camera. (in degs)
+float azimuth[3] = { 15.0f,  15.0f,  15.0f };                 // Azimuth of the camera. (in degs)
 
 													  //|___________________
 													  //|
@@ -187,6 +187,7 @@ void InitGL(void)
 void DisplayFunc(void)
 {
 	gmtl::AxisAnglef aa;    // Converts plane's quaternion to axis-angle form to be used by glRotatef()
+	gmtl::AxisAnglef bb;
 	gmtl::Vec3f axis;       // Axis component of axis-angle representation
 	float angle;            // Angle component of axis-angle representation
 
@@ -249,7 +250,7 @@ void DisplayFunc(void)
 	DrawCoordinateFrame(10);
 
 	// World-relative camera:
-	if (cam_id != 0) {
+	if (cam_id == 0) {
 		glPushMatrix();
 		glRotatef(azimuth[0], 0, 1, 0);
 		glRotatef(elevation[0], 1, 0, 0);
@@ -257,8 +258,23 @@ void DisplayFunc(void)
 		DrawCoordinateFrame(1);
 		glPopMatrix();
 	}
-
-	// Plane 2 body:
+	else if (cam_id == 2) {
+		glPushMatrix();
+		glRotatef(pp_angle, 0, 1, 0);
+		glRotatef(elevation[2], 1, 0, 0);
+		glTranslatef(0, 0, distance[2]);
+		DrawCoordinateFrame(1);
+		glPopMatrix();
+	}
+	else {
+		glPushMatrix();
+		glRotatef(azimuth[1], 0, 1, 0);
+		glRotatef(elevation[1], 1, 0, 0);
+		glTranslatef(0, 0, distance[1]);
+		DrawCoordinateFrame(1);
+		glPopMatrix();
+	}
+	// Plane 1 body:
 	glPushMatrix();
 	gmtl::set(aa, plane_q);                    // Converts plane's quaternion to axis-angle form to be used by glRotatef()
 	axis = aa.getAxis();
@@ -268,29 +284,27 @@ void DisplayFunc(void)
 	DrawBroom(P_WIDTH + 2, P_LENGTH, P_HEIGHT);
 	DrawCoordinateFrame(3);
 
-	// Plane 2's camera:
-	glPushMatrix();
-	glRotatef(azimuth[1], 0, 1, 0);
-	glRotatef(elevation[1], 1, 0, 0);
-	glTranslatef(0, 0, distance[1]);
-	DrawCoordinateFrame(1);
-	glPopMatrix();
+	// Cat's camera:
+	
 
 	// Propeller (subpart):
 
-	glPushMatrix();
+		glPushMatrix();
 		glTranslatef(-PROPELLER_POS[0], PROPELLER_POS[1], PROPELLER_POS[2]);     // Positions propeller on the plane
 		glRotatef(pp_angle, 0, 0, 1);                                           // Rotates propeller
 		DrawCatBody(PP_WIDTH + 5, PP_LENGTH, P_HEIGHT);
 		DrawCoordinateFrame(1);
-		glPushMatrix();
+			
+			
+
+			glPushMatrix();
 			glTranslatef(PROPELLER_POS[0], PROPELLER_POS[1] + 3.0, PROPELLER_POS[2] + 2.2);     // Positions propeller on the plane
 			glRotatef(pp2_angle, 0, 1, 0);                                           // Rotates propeller
 			DrawCatHead(PP_WIDTH + 5, PP_LENGTH, P_HEIGHT);
 			DrawCoordinateFrame(1);
 				glPushMatrix();
 				glTranslatef(PROPELLER_POS[0]+3, PROPELLER_POS[1]+1.0, PROPELLER_POS[2]);     // Positions propeller on the plane
-				glRotatef(pp3_angle, 0, 0, 1);                                           // Rotates propeller
+				glRotatef(pp3_angle, 0, 1, 0);                                           // Rotates propeller
 				DrawStar(PP_WIDTH + 2, PP_LENGTH, P_HEIGHT);
 				DrawCoordinateFrame(1);
 				glPopMatrix();
@@ -1298,7 +1312,7 @@ void DrawStar(const float width, const float length, const float height)
 	float z2 = 0;
 	float scal2 = width * 0.50f;
 
-	glColor3f(0.2f, 0.1f, 0.0f);
+	glColor3f(1.0f, 0.81f, 0.39f);
 	//1
 	glBegin(GL_TRIANGLES);
 	glVertex3f((0.00 * scal) + x, (0.00 * scal) + y, (0.20 * scal) + z);
@@ -1356,7 +1370,6 @@ void DrawStar(const float width, const float length, const float height)
 	glEnd();
 
 
-	glColor3f(0.5f, 0.2f, 0.7f);
 
 	//9
 	glBegin(GL_TRIANGLES);
@@ -1414,7 +1427,7 @@ void DrawStar(const float width, const float length, const float height)
 	glVertex3f((0.20 * scal) + x, (0.20 * scal) + y, (0.00 * scal) + z);
 	glEnd();
 
-	glColor3f(0.7f, 0.5f, 0.2f);
+	
 
 	//17
 	glBegin(GL_TRIANGLES);
