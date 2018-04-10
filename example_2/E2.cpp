@@ -306,7 +306,7 @@ void KeyboardFunc(unsigned char key, int x, int y)
 		gmtl::Quatf v_q = plane_q * gmtl::Quatf(PLANE_FORWARD[0], PLANE_FORWARD[1], PLANE_FORWARD[2], 0) * gmtl::makeConj(plane_q);
 		plane_p = plane_p + v_q.mData;
 	} break;
-	case 'f': { // Backward translation of the plane (-Z translation)
+	case 'f': { // Backward trrrrranslation of the plane (-Z translation)
 		gmtl::Quatf v_q = plane_q * gmtl::Quatf(-PLANE_FORWARD[0], -PLANE_FORWARD[1], -PLANE_FORWARD[2], 0) * gmtl::makeConj(plane_q);
 		plane_p = plane_p + v_q.mData;
 	} break;
