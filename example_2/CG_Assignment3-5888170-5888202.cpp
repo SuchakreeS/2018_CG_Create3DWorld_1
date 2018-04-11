@@ -80,7 +80,10 @@ int w_height = 600;
 gmtl::Point4f plane_p;      // Position (using explicit homogeneous form; see Quaternion example code)
 gmtl::Quatf plane_q;        // Quaternion
 
-							// Quaternions to rotate plane
+gmtl::Point4f cat_p;
+gmtl::Quatf cat_q;
+
+// Quaternions to rotate plane
 gmtl::Quatf zrotp_q;        // Positive and negative Z rotations
 gmtl::Quatf zrotn_q;
 
@@ -104,10 +107,10 @@ float distance[3] = { 20.0f,  20.0f,  20.0f };                 // Distance of th
 float elevation[3] = { -45.0f, -45.0f,  -45.0f };                 // Elevation of the camera. (in degs)
 float azimuth[3] = { 15.0f,  15.0f,  15.0f };                 // Azimuth of the camera. (in degs)
 
-													  //|___________________
-													  //|
-													  //| Function Prototypes
-													  //|___________________
+															  //|___________________
+															  //|
+															  //| Function Prototypes
+															  //|___________________
 
 void InitTransforms();
 void InitGL(void);
@@ -143,6 +146,9 @@ void InitTransforms()
 	// Inits plane pose
 	plane_p.set(1.0f, 0.0f, 4.0f, 1.0f);
 	plane_q.set(0, 0, 0, 1);
+
+	cat_p.set(1.0f, 0.0f, 6.2f, 1.0f);
+	cat_q.set(0, 0, 0, 1);
 
 	// Z rotations (roll)
 	zrotp_q.set(0, 0, SINTHETA_D2, COSTHETA_D2);      // +Z
@@ -187,7 +193,7 @@ void InitGL(void)
 void DisplayFunc(void)
 {
 	gmtl::AxisAnglef aa;    // Converts plane's quaternion to axis-angle form to be used by glRotatef()
-	gmtl::AxisAnglef bb;
+
 	gmtl::Vec3f axis;       // Axis component of axis-angle representation
 	float angle;            // Angle component of axis-angle representation
 
@@ -229,15 +235,15 @@ void DisplayFunc(void)
 
 		// TODO: Add case for the plane1's camera
 	case 2:
-		glTranslatef(0, 0, -distance[1]);
-		glRotatef(-elevation[1], 1, 0, 0);
-		glRotatef(-azimuth[1], 0, 1, 0);
+		glTranslatef(0, 0, -distance[2]);
+		glRotatef(-elevation[2], 1, 0, 0);
+		glRotatef(-azimuth[2], 0, 1, 0);
 
-		gmtl::set(aa, plane_q);                    // Converts plane's quaternion to axis-angle form to be used by glRotatef()
+		gmtl::set(aa, cat_q);                    // Converts plane's quaternion to axis-angle form to be used by glRotatef()
 		axis = aa.getAxis();
 		angle = aa.getAngle();
 		glRotatef(-gmtl::Math::rad2Deg(angle), axis[0], axis[1], axis[2]);
-		glTranslatef(-PROPELLER_POS[0], -PROPELLER_POS[1], -PROPELLER_POS[2]);
+		glTranslatef(-cat_p[0], -cat_p[1], -cat_p[2]);
 		break;
 	}
 
@@ -250,7 +256,7 @@ void DisplayFunc(void)
 	DrawCoordinateFrame(10);
 
 	// World-relative camera:
-	if (cam_id == 0) {
+	if (cam_id != 0) {
 		glPushMatrix();
 		glRotatef(azimuth[0], 0, 1, 0);
 		glRotatef(elevation[0], 1, 0, 0);
@@ -258,22 +264,23 @@ void DisplayFunc(void)
 		DrawCoordinateFrame(1);
 		glPopMatrix();
 	}
-	else if (cam_id == 2) {
-		glPushMatrix();
-		glRotatef(pp_angle, 0, 1, 0);
-		glRotatef(elevation[2], 1, 0, 0);
-		glTranslatef(0, 0, distance[2]);
-		DrawCoordinateFrame(1);
-		glPopMatrix();
+	/*else if (cam_id == 2) {
+	glPushMatrix();
+	glRotatef(azimuth[2], 0, 1, 0);
+	glRotatef(elevation[2], 1, 0, 0);
+	glTranslatef(0, 0, distance[2]);
+	DrawCoordinateFrame(1);
+	glPopMatrix();
 	}
 	else {
-		glPushMatrix();
-		glRotatef(azimuth[1], 0, 1, 0);
-		glRotatef(elevation[1], 1, 0, 0);
-		glTranslatef(0, 0, distance[1]);
-		DrawCoordinateFrame(1);
-		glPopMatrix();
-	}
+	glPushMatrix();
+	glRotatef(azimuth[1], 0, 1, 0);
+	glRotatef(elevation[1], 1, 0, 0);
+	glTranslatef(0, 0, distance[1]);
+	DrawCoordinateFrame(1);
+	glPopMatrix();
+	}*/
+
 	// Plane 1 body:
 	glPushMatrix();
 	gmtl::set(aa, plane_q);                    // Converts plane's quaternion to axis-angle form to be used by glRotatef()
@@ -285,31 +292,28 @@ void DisplayFunc(void)
 	DrawCoordinateFrame(3);
 
 	// Cat's camera:
-	
-
 	// Propeller (subpart):
 
-		glPushMatrix();
-		glTranslatef(-PROPELLER_POS[0], PROPELLER_POS[1], PROPELLER_POS[2]);     // Positions propeller on the plane
-		glRotatef(pp_angle, 0, 0, 1);                                           // Rotates propeller
-		DrawCatBody(PP_WIDTH + 5, PP_LENGTH, P_HEIGHT);
-		DrawCoordinateFrame(1);
-			
-			
+	glPushMatrix();
+	glTranslatef(-PROPELLER_POS[0], PROPELLER_POS[1], PROPELLER_POS[2]);     // Positions propeller on the plane
+	glRotatef(pp_angle, 0, 0, 1);                                           // Rotates propeller
+	DrawCatBody(PP_WIDTH + 5, PP_LENGTH, P_HEIGHT);
+	DrawCoordinateFrame(1);
 
-			glPushMatrix();
-			glTranslatef(PROPELLER_POS[0], PROPELLER_POS[1] + 3.0, PROPELLER_POS[2] + 2.2);     // Positions propeller on the plane
-			glRotatef(pp2_angle, 0, 1, 0);                                           // Rotates propeller
-			DrawCatHead(PP_WIDTH + 5, PP_LENGTH, P_HEIGHT);
-			DrawCoordinateFrame(1);
-				glPushMatrix();
-				glTranslatef(PROPELLER_POS[0]+3, PROPELLER_POS[1]+1.0, PROPELLER_POS[2]);     // Positions propeller on the plane
-				glRotatef(pp3_angle, 0, 1, 0);                                           // Rotates propeller
-				DrawStar(PP_WIDTH + 2, PP_LENGTH, P_HEIGHT);
-				DrawCoordinateFrame(1);
-				glPopMatrix();
-			glPopMatrix();
-		glPopMatrix();
+	glPushMatrix();
+	glTranslatef(PROPELLER_POS[0], PROPELLER_POS[1] + 3.0, PROPELLER_POS[2] + 2.2);     // Positions propeller on the plane
+	glRotatef(pp2_angle, 0, 1, 0);                                           // Rotates propeller
+	DrawCatHead(PP_WIDTH + 5, PP_LENGTH, P_HEIGHT);
+	DrawCoordinateFrame(1);
+
+	glPushMatrix();
+	glTranslatef(PROPELLER_POS[0] + 3, PROPELLER_POS[1] + 1.0, PROPELLER_POS[2]);     // Positions propeller on the plane
+	glRotatef(pp3_angle, 0, 1, 0);                                           // Rotates propeller
+	DrawStar(PP_WIDTH + 2, PP_LENGTH, P_HEIGHT);
+	DrawCoordinateFrame(1);
+	glPopMatrix();
+	glPopMatrix();
+	glPopMatrix();
 	glPopMatrix();
 
 	glutSwapBuffers();                          // Replaces glFlush() to use double buffering
@@ -340,7 +344,7 @@ void KeyboardFunc(unsigned char key, int x, int y)
 		printf("View camera = %d\n", cam_id);
 		break;
 	case 'b': // Select camera to control
-		camctrl_id = (camctrl_id + 1) % 2;
+		camctrl_id = (camctrl_id + 1) % 3;
 		printf("Control camera = %d\n", camctrl_id);
 		break;
 
@@ -352,24 +356,30 @@ void KeyboardFunc(unsigned char key, int x, int y)
 	case 's': { // Forward translation of the plane (+Z translation)  
 		gmtl::Quatf v_q = plane_q * gmtl::Quatf(PLANE_FORWARD[0], PLANE_FORWARD[1], PLANE_FORWARD[2], 0) * gmtl::makeConj(plane_q);
 		plane_p = plane_p + v_q.mData;
+		cat_p = cat_p + v_q.mData;
 	} break;
 	case 'f': { // Backward trrrrranslation of the plane (-Z translation)
 		gmtl::Quatf v_q = plane_q * gmtl::Quatf(-PLANE_FORWARD[0], -PLANE_FORWARD[1], -PLANE_FORWARD[2], 0) * gmtl::makeConj(plane_q);
 		plane_p = plane_p + v_q.mData;
+		cat_p = cat_p + v_q.mData;
 	} break;
 
 	case 'e': // Rolls the plane (+Z rot)
 		plane_q = plane_q * zrotp_q;
+		cat_q = cat_q * zrotp_q;
 		break;
 	case 'q': // Rolls the plane (-Z rot)
 		plane_q = plane_q * zrotn_q;
+		cat_q = cat_q * zrotn_q;
 		break;
 
 	case 'x': // Pitches the plane (+X rot)
 		plane_q = plane_q * xrotp_q;
+		cat_q = cat_q * xrotp_q;
 		break;
 	case 'a': // Yaws the plane (+Y rot)
 		plane_q = plane_q * yrotp_q;
+		cat_q = cat_q * yrotp_q;
 		break;
 
 		//|____________________________________________________________________
@@ -379,12 +389,13 @@ void KeyboardFunc(unsigned char key, int x, int y)
 
 	case 'r': // Rotates propeller 
 		pp_angle += PROPELLER_ROTATION;
+		cat_q = cat_q * zrotp_q;
 		break;
 	case 't':
-		pp2_angle += 2 * PROPELLER_ROTATION;
+		pp2_angle += PROPELLER_ROTATION;
 		break;
 	case 'y':
-		pp3_angle += 2 * PROPELLER_ROTATION;
+		pp3_angle += PROPELLER_ROTATION;
 		break;
 
 
@@ -418,7 +429,7 @@ void MouseFunc(int button, int state, int x, int y)
 		my_prev = y;
 	}
 	else {
-		mbuttons[button] = true;
+		mbuttons[button] = false;
 	}
 
 	// Updates keyboard modifiers
@@ -465,7 +476,7 @@ void MotionFunc(int x, int y)
 		}
 
 		// Hold right button to zoom
-		if (mbuttons[GLUT_RIGHT_BUTTON]) {
+		else if (mbuttons[GLUT_RIGHT_BUTTON]) {
 			if (abs(dx) >= abs(dy)) {
 				d = dx;
 			}
@@ -1302,9 +1313,9 @@ void DrawBroom(const float width, const float length, const float height)
 
 void DrawStar(const float width, const float length, const float height)
 {
-	float x = -width * 0.15f+0.2;
-	float y = width * 0.02f-0.2;
-	float z = width * 0.25f-0.8;
+	float x = -width * 0.15f + 0.2;
+	float y = width * 0.02f - 0.2;
+	float z = width * 0.25f - 0.8;
 	float scal = width * 0.75f;
 
 	float x2 = 0;
@@ -1427,7 +1438,7 @@ void DrawStar(const float width, const float length, const float height)
 	glVertex3f((0.20 * scal) + x, (0.20 * scal) + y, (0.00 * scal) + z);
 	glEnd();
 
-	
+
 
 	//17
 	glBegin(GL_TRIANGLES);
