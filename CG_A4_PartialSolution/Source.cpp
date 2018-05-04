@@ -379,7 +379,7 @@ void DisplayFunc(void)
 	//| Setting up view transform by:
 	//| "move up to the world frame by composing all of the (inverse) transforms from the camera up to the world node"
 	//|____________________________________________________________________
-
+	
 	switch (cam_id) {
 	case 0:
 		// For the world-relative camera
@@ -390,8 +390,7 @@ void DisplayFunc(void)
 		glPopMatrix();
 		glTranslatef(0, 0, -distance[0]);
 		glRotatef(-elevation[0], 1, 0, 0);
-		glRotatef(-azimuth[0], 0, 1, 0);
-		
+		glRotatef(-azimuth[0], 0, 1, 0);	
 		break;
 
 	case 1:
@@ -399,13 +398,12 @@ void DisplayFunc(void)
 		gmtl::set(aa, plane_q);                    // Converts plane's quaternion to axis-angle form to be used by glRotatef()
 		axis = aa.getAxis();
 		angle = aa.getAngle();
-
 		glPushMatrix();
-			glRotatef(-elevation[0], 1, 0, 0);
-			glRotatef(-azimuth[0], 0, 1, 0);
-			DrawSkybox(SB_SIZE);
-			glRotatef(-gmtl::Math::rad2Deg(angle), axis[0], axis[1], axis[2]);
+		glRotatef(-elevation[0], 1, 0, 0);
+		glRotatef(-azimuth[0], 0, 1, 0);
+		DrawSkybox(SB_SIZE);
 		glPopMatrix();
+		
 
 		glTranslatef(0, 0, -distance[1]);
 		glRotatef(-elevation[1], 1, 0, 0);
@@ -416,18 +414,7 @@ void DisplayFunc(void)
 		glTranslatef(-plane_p[0], -plane_p[1], -plane_p[2]);
 		
 		break;
-	case 2:
-		glTranslatef(0, 0, -distance[2]);
-		glRotatef(-elevation[2], 1, 0, 0);
-		glRotatef(-azimuth[2], 0, 1, 0);
-
-		gmtl::set(aa, cat_q);                    // Converts plane's quaternion to axis-angle form to be used by glRotatef()
-		axis = aa.getAxis();
-		angle = aa.getAngle();
-		glRotatef(-gmtl::Math::rad2Deg(angle), axis[0], axis[1], axis[2]);
-		glTranslatef(-cat_p[0], -cat_p[1], -cat_p[2]);
-		break;
-		// TODO: Add case for the plane1's camera
+	
 	}
 
 	//|____________________________________________________________________
@@ -441,8 +428,8 @@ void DisplayFunc(void)
 
 	// World node: draws world coordinate frame
 	DrawCoordinateFrame(10);
-	
 	DrawCurcle(P_WIDTH + 2, P_LENGTH, P_HEIGHT);
+	DrawCurcle(P_WIDTH + 2+700, P_LENGTH+300, P_HEIGHT);
 	// World-relative camera:
 	if (cam_id != 0) {
 		glPushMatrix();
@@ -511,11 +498,11 @@ void KeyboardFunc(unsigned char key, int x, int y)
 		//|____________________________________________________________________
 
 	case 'v': // Select camera to view
-		cam_id = (cam_id + 1) % 3;				// 3 cam_id
+		cam_id = (cam_id + 1) % 2;				// 3 cam_id
 		printf("View camera = %d\n", cam_id);
 		break;
 	case 'b': // Select camera to control
-		camctrl_id = (camctrl_id + 1) % 3;
+		camctrl_id = (camctrl_id + 1) % 2;
 		printf("Control camera = %d\n", camctrl_id);
 		break;
 
@@ -1637,11 +1624,11 @@ void DrawStar(const float width, const float length, const float height)
 
 
 void DrawCurcle(const float width, const float length, const float height) {
-	float x = -width * 0.15f + 0.2;
-	float y = width * 0.02f - 0.2;
-	float z = width * 0.25f - 0.8;
+	float x = -width * 0.15f + 30.2;
+	float y = width * 0.02f - 150.2;
+	float z = width * 0.25f - 30.8;
 	float scal = width * 2.f;
-	float h = 12.f;
+	float h = 150.f;
 	const float COSTHETA = cos(ROT_AMOUNT);
 	const float SINTHETA = sin(ROT_AMOUNT);
 	yrotp_mat.set(COSTHETA, 0, SINTHETA, 0,
@@ -1653,9 +1640,9 @@ void DrawCurcle(const float width, const float length, const float height) {
 	//float p0[3], p1[3], p2[3], p3[3], p4[3], p5[3], temp[3];
 
 	p0.set(0, 0, 0, 1);
-	p8.set(0, h + 5, 0, 1);
-	p1.set(10, 0, 0, 1);
-	p6.set(12, h, 0, 1);
+	p8.set(0, h + 50, 0, 1);
+	p1.set(20, 0, 0, 1);
+	p6.set(30, h, 0, 1);
 	for (int i = 0; i < 360; i++) {
 		p2 = yrotp_mat * p1;
 		p7 = yrotp_mat * p6;
@@ -1689,13 +1676,13 @@ void DrawCurcle(const float width, const float length, const float height) {
 		glVertex3f(p6[0] + x, p6[1] + y, p6[2] + z);
 		glVertex3f(p7[0] + x, p7[1] + y, p7[2] + z);
 		glEnd();
-		/*
+		
 		glBegin(GL_TRIANGLES);
 		glVertex3f(p8[0] + x, p8[1] + y, p8[2] + z);
 		glVertex3f(p6[0] + x, p6[1] + y, p6[2] + z);
 		glVertex3f(p7[0] + x, p7[1] + y, p7[2] + z);
 		glEnd();
-		*/
+		
 		p1 = p2;
 		p6 = p7;
 	}
