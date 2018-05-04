@@ -17,6 +17,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CG_A4_TextureMappingFile", 
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CG_A4_PartialSolution", "CG_A4_PartialSolution\CG_A4_PartialSolution.vcxproj", "{2790ADF3-0F49-4502-B993-6C2B67125E96}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CG_Assignment4-5888170-5888202", "CG_Assignment4-5888170-5888202\CG_Assignment4-5888170-5888202.vcxproj", "{20DF44BB-424F-4ABC-A7AA-72ED3B9E26AD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -81,6 +83,14 @@ Global
 		{2790ADF3-0F49-4502-B993-6C2B67125E96}.Release|x64.Build.0 = Release|x64
 		{2790ADF3-0F49-4502-B993-6C2B67125E96}.Release|x86.ActiveCfg = Release|Win32
 		{2790ADF3-0F49-4502-B993-6C2B67125E96}.Release|x86.Build.0 = Release|Win32
+		{20DF44BB-424F-4ABC-A7AA-72ED3B9E26AD}.Debug|x64.ActiveCfg = Debug|x64
+		{20DF44BB-424F-4ABC-A7AA-72ED3B9E26AD}.Debug|x64.Build.0 = Debug|x64
+		{20DF44BB-424F-4ABC-A7AA-72ED3B9E26AD}.Debug|x86.ActiveCfg = Debug|Win32
+		{20DF44BB-424F-4ABC-A7AA-72ED3B9E26AD}.Debug|x86.Build.0 = Debug|Win32
+		{20DF44BB-424F-4ABC-A7AA-72ED3B9E26AD}.Release|x64.ActiveCfg = Release|x64
+		{20DF44BB-424F-4ABC-A7AA-72ED3B9E26AD}.Release|x64.Build.0 = Release|x64
+		{20DF44BB-424F-4ABC-A7AA-72ED3B9E26AD}.Release|x86.ActiveCfg = Release|Win32
+		{20DF44BB-424F-4ABC-A7AA-72ED3B9E26AD}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

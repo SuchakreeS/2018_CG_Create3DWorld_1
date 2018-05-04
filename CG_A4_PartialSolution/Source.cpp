@@ -76,10 +76,10 @@ const float CAM_FOV = 90.0f;                     // Field of view in degs
 enum KeyModifier { KM_SHIFT = 0, KM_CTRL, KM_ALT };
 
 // Textures
-enum TextureID { TID_SKYBACK , TID_SKYLEFT, TID_SKYBOTTOM, TID_SKYTOP, TID_SKYRIGHT, TID_SKYFRONT, TEXTURE_NB };  // Texture IDs, with the last ID indicating the total number of textures
+enum TextureID { TID_SKYBACK , TID_SKYBACK_2,  TID_SKYLEFT, TID_SKYBOTTOM, TID_SKYTOP, TID_SKYRIGHT, TID_SKYFRONT, TEXTURE_NB };  // Texture IDs, with the last ID indicating the total number of textures
 
 																			 // Skybox
-const float SB_SIZE = 40.0f;                     // Skybox dimension
+const float SB_SIZE = 1100.0f;                     // Skybox dimension
 
 												 // Lighting
 const GLfloat NO_LIGHT[] = { 0.0, 0.0, 0.0, 1.0 };
@@ -96,6 +96,15 @@ const GLfloat DARK_COL[] = { 0.1, 0.1, 0.1, 1.0 };
 const GLfloat MEDIUMWHITE_COL[] = { 0.7, 0.7, 0.7, 1.0 };
 const GLfloat SPECULAR_COL[] = { 0.7, 0.7, 0.7, 1.0 };
 
+const GLfloat BRIGHTPURPLE_COL[] = { 0.7, 0.0, 0.7, 1.0 };
+const GLfloat DARKPURPLE_COL[] = { 0.1, 0.0, 0.1, 1.0 };
+const GLfloat BRIGHTYELLOW_COL[] = { 1.0, 0.85, 0.05, 1.0 };
+const GLfloat DARKYELLOW_COL[] = { 0.95, 0.75, 0.05, 1.0 };
+const GLfloat BRIGHTBROWN_COL[] = { 0.9, 0.55, 0.0, 1.0 };
+const GLfloat DARKBROWN_COL[] = { 0.4, 0.05, 0.0, 1.0 };
+const GLfloat BRIGHTBROWN2_COL[] = { 0.55, 0.25, 0.0, 1.0 };
+const GLfloat DARKBROWN2_COL[] = { 0.05, 0.01, 0.0, 1.0 };
+
 //|___________________
 //|
 //| Global Variables
@@ -110,6 +119,8 @@ gmtl::Point4f plane_p;      // Position (using explicit homogeneous form; see Qu
 gmtl::Quatf plane_q;        // Quaternion
 gmtl::Point4f cat_p;
 gmtl::Quatf cat_q;
+gmtl::Point4f skybox_p;
+gmtl::Quatf skybox_q;
 
 // Quaternions to rotate plane		
 							// Quaternions to rotate plane
@@ -217,10 +228,11 @@ void InitGL(void)
 
 	
 	char skyBack[50] = "skybox_back.ppm";
+	char skyBack2[50] = "skybox_back_2.ppm";
 	char skyLeft[50] = "skybox_left_2.ppm";
-	char skyBottom[50] = "skybox_down_2.ppm";
+	char skyBottom[50] = "skybox_down_3.ppm";
 	char skyFront[50] = "skybox_front_2.ppm";
-	char skyUp[50] = "skybox_top_2.ppm";
+	char skyUp[50] = "skybox_top_3.ppm";
 	char skyRight[50] = "skybox_right_2.ppm";
 	
 	/*
@@ -273,6 +285,13 @@ void InitGL(void)
 	// Skybox back wall
 	glBindTexture(GL_TEXTURE_2D, textures[TID_SKYBACK]);
 	LoadPPM(skyBack, &width, &height, &img_data, 1);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, img_data);
+	free(img_data);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	// Skybox back2 wall
+	glBindTexture(GL_TEXTURE_2D, textures[TID_SKYBACK_2]);
+	LoadPPM(skyBack2, &width, &height, &img_data, 1);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, img_data);
 	free(img_data);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -373,6 +392,7 @@ void DisplayFunc(void)
 		angle = aa.getAngle();
 		glRotatef(-gmtl::Math::rad2Deg(angle), axis[0], axis[1], axis[2]);
 		glTranslatef(-plane_p[0], -plane_p[1], -plane_p[2]);
+		
 		break;
 	case 2:
 		glTranslatef(0, 0, -distance[2]);
@@ -759,7 +779,10 @@ void DrawCatBody(const float width, const float length, const float height)
 	float z2 = 0;
 	float scal2 = width * 0.50f;
 
-	glColor3f(0.31f, 0.13f, 0.33f);
+	
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, DARKPURPLE_COL);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, BRIGHTPURPLE_COL);
+	glNormal3f(0.0f, 1.0f, 0.0f);
 	// R1
 	glBegin(GL_QUAD_STRIP);
 	glVertex3f((0.00 * scal) + x, (0.10 * scal) + y, (0.00 * scal) + z);
@@ -855,7 +878,9 @@ void DrawCatHead(const float width, const float length, const float height)
 	float z2 = 0;
 	float scal2 = width * 0.50f;
 
-	glColor3f(0.31f, 0.13f, 0.33f);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, DARKPURPLE_COL);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, BRIGHTPURPLE_COL);
+	glNormal3f(0.0f, 1.0f, 0.0f);
 	// R3
 	glBegin(GL_QUAD_STRIP);
 	glVertex3f((0.00 * scal) + x, (0.64 * scal) + y, (0.09 * scal) + z);
@@ -977,9 +1002,9 @@ void DrawCatHead(const float width, const float length, const float height)
 	glColor3f(0.31f, 0.13f, 0.33f);
 	// R5
 	glBegin(GL_TRIANGLES);
-	glVertex3f((-0.03 * scal) + x, (1.00 * scal) + y, (0.22 * scal) + z);
-	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
 	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.35 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
+	glVertex3f((-0.03 * scal) + x, (1.00 * scal) + y, (0.22 * scal) + z);
 	glEnd();
 
 	// B10
@@ -992,15 +1017,15 @@ void DrawCatHead(const float width, const float length, const float height)
 	// B12
 	glBegin(GL_TRIANGLES);
 	glVertex3f((0.47 * scal) + x, (1.00 * scal) + y, (0.22 * scal) + z);
-	glVertex3f((0.30 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
 	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
+	glVertex3f((0.30 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
 	glEnd();
 
 	// L19
 	glBegin(GL_TRIANGLES);
 	glVertex3f((0.47 * scal) + x, (1.00 * scal) + y, (0.22 * scal) + z);
-	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
 	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.35 * scal) + z);
+	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
 	glEnd();
 
 	// B25
@@ -1012,8 +1037,8 @@ void DrawCatHead(const float width, const float length, const float height)
 	// B26
 	glBegin(GL_TRIANGLES);
 	glVertex3f((0.47 * scal) + x, (1.00 * scal) + y, (0.22 * scal) + z);
-	glVertex3f((0.30 * scal) + x, (0.94 * scal) + y, (0.28 * scal) + z);
 	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.35 * scal) + z);
+	glVertex3f((0.30 * scal) + x, (0.94 * scal) + y, (0.28 * scal) + z);
 	glEnd();
 	// B25 - in ear
 	glColor3f(0.51f, 0.33f, 0.53f);
@@ -1025,16 +1050,16 @@ void DrawCatHead(const float width, const float length, const float height)
 	// B26 - in ear
 	glBegin(GL_TRIANGLES);
 	glVertex3f((0.44 * scal) + x, (0.97 * scal) + y, (0.23 * scal) + z);
-	glVertex3f((0.33 * scal) + x, (0.91 * scal) + y, (0.29 * scal) + z);
 	glVertex3f((0.41 * scal) + x, (0.88 * scal) + y, (0.34 * scal) + z);
+	glVertex3f((0.33 * scal) + x, (0.91 * scal) + y, (0.29 * scal) + z);
 	glEnd();
 
 
 	// Up ear left
 	glBegin(GL_TRIANGLES);
 	glVertex3f((-0.03 * scal) + x, (1.00 * scal) + y, (0.22 * scal) + z);
-	glVertex3f((0.14 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
 	glVertex3f((0.14 * scal) + x, (0.94 * scal) + y, (0.28 * scal) + z);
+	glVertex3f((0.14 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
 	glEnd();
 	// Up ear right
 	glBegin(GL_TRIANGLES);
@@ -1077,90 +1102,10 @@ void DrawCatEar(const float width, const float length, const float height)
 	float z2 = 0;
 	float scal2 = width * 0.50f;
 
-	glColor3f(0.31f, 0.13f, 0.33f);
-	// R5
-	glBegin(GL_TRIANGLES);
-	glVertex3f((-0.03 * scal) + x, (1.00 * scal) + y, (0.22 * scal) + z);
-	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
-	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.35 * scal) + z);
-	glEnd();
-
-	// B10
-	glBegin(GL_TRIANGLES);
-	glVertex3f((-0.03 * scal) + x, (1.00 * scal) + y, (0.22 * scal) + z);
-	glVertex3f((0.14 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
-	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
-	glEnd();
-
-	// B12
-	glBegin(GL_TRIANGLES);
-	glVertex3f((0.47 * scal) + x, (1.00 * scal) + y, (0.22 * scal) + z);
-	glVertex3f((0.30 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
-	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
-	glEnd();
-
-	// L19
-	glBegin(GL_TRIANGLES);
-	glVertex3f((0.47 * scal) + x, (1.00 * scal) + y, (0.22 * scal) + z);
-	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
-	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.35 * scal) + z);
-	glEnd();
-
-	// B25
-	glBegin(GL_TRIANGLES);
-	glVertex3f((-0.03 * scal) + x, (1.00 * scal) + y, (0.22 * scal) + z);
-	glVertex3f((0.14 * scal) + x, (0.94 * scal) + y, (0.28 * scal) + z);
-	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.35 * scal) + z);
-	glEnd();
-	// B26
-	glBegin(GL_TRIANGLES);
-	glVertex3f((0.47 * scal) + x, (1.00 * scal) + y, (0.22 * scal) + z);
-	glVertex3f((0.30 * scal) + x, (0.94 * scal) + y, (0.28 * scal) + z);
-	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.35 * scal) + z);
-	glEnd();
-	// B25 - in ear
-	glColor3f(0.51f, 0.33f, 0.53f);
-	glBegin(GL_TRIANGLES);
-	glVertex3f((0.00 * scal) + x, (0.97 * scal) + y, (0.23 * scal) + z);
-	glVertex3f((0.11 * scal) + x, (0.91 * scal) + y, (0.29 * scal) + z);
-	glVertex3f((0.03 * scal) + x, (0.88 * scal) + y, (0.34 * scal) + z);
-	glEnd();
-	// B26 - in ear
-	glBegin(GL_TRIANGLES);
-	glVertex3f((0.44 * scal) + x, (0.97 * scal) + y, (0.23 * scal) + z);
-	glVertex3f((0.33 * scal) + x, (0.91 * scal) + y, (0.29 * scal) + z);
-	glVertex3f((0.41 * scal) + x, (0.88 * scal) + y, (0.34 * scal) + z);
-	glEnd();
-
-
-	// Up ear left
-	glBegin(GL_TRIANGLES);
-	glVertex3f((-0.03 * scal) + x, (1.00 * scal) + y, (0.22 * scal) + z);
-	glVertex3f((0.14 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
-	glVertex3f((0.14 * scal) + x, (0.94 * scal) + y, (0.28 * scal) + z);
-	glEnd();
-	// Up ear right
-	glBegin(GL_TRIANGLES);
-	glVertex3f((0.47 * scal) + x, (1.00 * scal) + y, (0.22 * scal) + z);
-	glVertex3f((0.30 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
-	glVertex3f((0.30 * scal) + x, (0.94 * scal) + y, (0.28 * scal) + z);
-	glEnd();
-
-	// Up head Left
-	glBegin(GL_QUAD_STRIP);
-	glVertex3f((0.14 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
-	glVertex3f((0.14 * scal) + x, (0.94 * scal) + y, (0.28 * scal) + z);
-	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
-	glVertex3f((0.00 * scal) + x, (0.85 * scal) + y, (0.35 * scal) + z);
-	glEnd();
-
-	// Up head Right
-	glBegin(GL_QUAD_STRIP);
-	glVertex3f((0.30 * scal) + x, (0.94 * scal) + y, (0.16 * scal) + z);
-	glVertex3f((0.30 * scal) + x, (0.94 * scal) + y, (0.28 * scal) + z);
-	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.09 * scal) + z);
-	glVertex3f((0.44 * scal) + x, (0.85 * scal) + y, (0.35 * scal) + z);
-	glEnd();
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, DARKPURPLE_COL);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, BRIGHTPURPLE_COL);
+	glNormal3f(0.0f, 1.0f, 0.0f);
+	
 
 }
 
@@ -1182,12 +1127,13 @@ void DrawBroom(const float width, const float length, const float height)
 
 	//------- Meaw -----------------------------------------
 	glBegin(GL_TRIANGLES);
-	glColor3f(0.2f, 0.1f, 0.0f);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, DARKBROWN_COL);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, BRIGHTBROWN_COL);
+	glNormal3f(0.0f, 1.0f, 0.0f);
 	glVertex3f((0.05 * scal2) + x2, (0.05 * scal2) + y2, (2 * scal2) + z2);
 	glVertex3f((0.05 * scal2) + x2, (-0.05 * scal2) + y2, (2 * scal2) + z2);
 	glVertex3f((0.08 * scal2) + x2, (0 * scal2) + y2, (1.98 * scal2) + z2);
 
-	glColor3f(0.2f, 0.1f, 0.0f);
 	glVertex3f((-0.05 * scal2) + x2, (0.05 * scal2) + y2, (2 * scal2) + z2);
 	glVertex3f((-0.05 * scal2) + x2, (-0.05 * scal2) + y2, (2 * scal2) + z2);
 	glVertex3f((-0.08 * scal2) + x2, (0 * scal2) + y2, (1.98 * scal2) + z2);
@@ -1195,7 +1141,6 @@ void DrawBroom(const float width, const float length, const float height)
 	glEnd();
 
 	glBegin(GL_QUAD_STRIP);
-	glColor3f(0.2f, 0.1f, 0.0f);
 	glVertex3f((0.05 * scal2) + x2, (0.05 * scal2) + y2, (2 * scal2) + z2);
 	glVertex3f((0.05 * scal2) + x2, (-0.05 * scal2) + y2, (2 * scal2) + z2);
 	glVertex3f((-0.05 * scal2) + x2, (0.05 * scal2) + y2, (2 * scal2) + z2);
@@ -1204,42 +1149,42 @@ void DrawBroom(const float width, const float length, const float height)
 
 	glBegin(GL_QUAD_STRIP);
 	// (-0.05, 0.05, 8) (0.05, 0.05, 8) AB
-	glColor3f(0.3f, 0.1f, 0.0f);
+	
 	glVertex3f((-0.05 * scal2) + x2, (0.05 * scal2) + y2, (2 * scal2) + z2); // A
 	glVertex3f((-0.05 * scal2) + x2, (0.05 * scal2) + y2, (0 * scal2) + z2); // G
 	glVertex3f((0.05 * scal2) + x2, (0.05 * scal2) + y2, (2 * scal2) + z2);  //B
 	glVertex3f((0.05 * scal2) + x2, (0.05 * scal2) + y2, (0 * scal2) + z2);  // H
 
 																			 // (0.05, 0.05, 8) (0.08, 0, 8) BC
-	glColor3f(0.3f, 0.1f, 0.0f);
+	
 	glVertex3f((0.05 * scal2) + x2, (0.05 * scal2) + y2, (2 * scal2) + z2); // B
 	glVertex3f((0.05 * scal2) + x2, (0.05 * scal2) + y2, (0 * scal2) + z2); // H
 	glVertex3f((0.08 * scal2) + x2, (0 * scal2) + y2, (1.98 * scal2) + z2); // C
 	glVertex3f((0.08 * scal2) + x2, (0 * scal2) + y2, (0 * scal2) + z2);    // I
 
 																			// (0.08, 0, 8) (0.05, -0.05, 8) CD
-	glColor3f(0.3f, 0.1f, 0.0f);
+	
 	glVertex3f((0.08 * scal2) + x2, (0 * scal2) + y2, (1.98 * scal2) + z2); // C
 	glVertex3f((0.08 * scal2) + x2, (0 * scal2) + y2, (0 * scal2) + z2); // I
 	glVertex3f((0.05 * scal2) + x2, (-0.05 * scal2) + y2, (2 * scal2) + z2); // D
 	glVertex3f((0.05 * scal2) + x2, (-0.05 * scal2) + y2, (0 * scal2) + z2); // J
 
 																			 // (0.05, -0.05, 8) (-0.05, -0.05, 8) DE
-	glColor3f(0.3f, 0.1f, 0.0f);
+	
 	glVertex3f((0.05 * scal2) + x2, (-0.05 * scal2) + y2, (2 * scal2) + z2); // D
 	glVertex3f((0.05 * scal2) + x2, (-0.05 * scal2) + y2, (0 * scal2) + z2); // J
 	glVertex3f((-0.05 * scal2) + x2, (-0.05 * scal2) + y2, (2 * scal2) + z2); // E
 	glVertex3f((-0.05 * scal2) + x2, (-0.05 * scal2) + y2, (0 * scal2) + z2); // K
 
 																			  // (-0.05, -0.05, 8) (-0.08, 0, 8) EF
-	glColor3f(0.3f, 0.1f, 0.0f);
+	
 	glVertex3f((-0.05 * scal2) + x2, (-0.05 * scal2) + y2, (2 * scal2) + z2); // E
 	glVertex3f((-0.05 * scal2) + x2, (-0.05 * scal2) + y2, (0 * scal2) + z2); // K
 	glVertex3f((-0.08 * scal2) + x2, (0 * scal2) + y2, (1.98 * scal2) + z2); // F
 	glVertex3f((-0.08 * scal2) + x2, (0 * scal2) + y2, (0 * scal2) + z2); // L
 
 																		  // (-0.08, 0, 8) (-0.05, 0.05, 8) FA
-	glColor3f(0.3f, 0.1f, 0.0f);
+	
 	glVertex3f((-0.08 * scal2) + x2, (0 * scal2) + y2, (1.98 * scal2) + z2);  // F
 	glVertex3f((-0.08 * scal2) + x2, (0 * scal2) + y2, (0 * scal2) + z2); // L
 	glVertex3f((-0.05 * scal2) + x2, (0.05 * scal2) + y2, (2 * scal2) + z2); // A
@@ -1250,7 +1195,10 @@ void DrawBroom(const float width, const float length, const float height)
 	glBegin(GL_QUAD_STRIP);
 
 	// 1
-	glColor3f(0.8f, 0.5f, 0.0f);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, DARKBROWN2_COL);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, BRIGHTBROWN2_COL);
+	glNormal3f(0.0f, 1.0f, 0.0f);
+
 	glVertex3f((-0.1 * scal2) + x2, (0.1 * scal2) + y2, (0 * scal2) + z2); // 1
 	glVertex3f((0.1 * scal2) + x2, (0.1 * scal2) + y2, (0 * scal2) + z2);  // 2
 	glVertex3f((-0.1 * scal2) + x2, (-0.1 * scal2) + y2, (0 * scal2) + z2); // 6
@@ -1324,6 +1272,7 @@ void DrawBroom(const float width, const float length, const float height)
 
 	glBegin(GL_QUAD_STRIP);
 	// 3
+	
 	glColor3f(0.5f, 0.2f, 0.0f);
 	glVertex3f((-0.06 * scal2) + x2, (0.06 * scal2) + y2, (-0.12 * scal2) + z2); // 1
 	glVertex3f((0.06 * scal2) + x2, (0.06 * scal2) + y2, (-0.12 * scal2) + z2);  // 2
@@ -1469,7 +1418,9 @@ void DrawStar(const float width, const float length, const float height)
 	float z2 = 0;
 	float scal2 = width * 0.50f;
 
-	glColor3f(1.0f, 0.81f, 0.39f);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, DARKYELLOW_COL);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, BRIGHTYELLOW_COL);
+	glNormal3f(0.0f, 1.0f, 0.0f);
 	//1
 	glBegin(GL_TRIANGLES);
 	glVertex3f((0.00 * scal) + x, (0.00 * scal) + y, (0.20 * scal) + z);
@@ -1480,8 +1431,8 @@ void DrawStar(const float width, const float length, const float height)
 	//2
 	glBegin(GL_TRIANGLES);
 	glVertex3f((0.10 * scal) + x, (0.10 * scal) + y, (0.30 * scal) + z);
-	glVertex3f((0.00 * scal) + x, (0.00 * scal) + y, (0.20 * scal) + z);
 	glVertex3f((0.20 * scal) + x, (0.00 * scal) + y, (0.20 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.00 * scal) + y, (0.20 * scal) + z);
 	glEnd();
 
 	//3
@@ -1494,8 +1445,8 @@ void DrawStar(const float width, const float length, const float height)
 	//4
 	glBegin(GL_TRIANGLES);
 	glVertex3f((0.00 * scal) + x, (0.20 * scal) + y, (0.20 * scal) + z);
-	glVertex3f((0.00 * scal) + x, (0.00 * scal) + y, (0.20 * scal) + z);
 	glVertex3f((0.10 * scal) + x, (0.10 * scal) + y, (0.30 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.00 * scal) + y, (0.20 * scal) + z);
 	glEnd();
 
 	//5
@@ -1522,8 +1473,8 @@ void DrawStar(const float width, const float length, const float height)
 	//8
 	glBegin(GL_TRIANGLES);
 	glVertex3f((0.10 * scal) + x, (0.60 * scal) + y, (0.10 * scal) + z);
-	glVertex3f((0.00 * scal) + x, (0.20 * scal) + y, (0.20 * scal) + z);
 	glVertex3f((0.20 * scal) + x, (0.20 * scal) + y, (0.20 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.20 * scal) + y, (0.20 * scal) + z);
 	glEnd();
 
 
@@ -1580,8 +1531,8 @@ void DrawStar(const float width, const float length, const float height)
 	//16
 	glBegin(GL_TRIANGLES);
 	glVertex3f((0.10 * scal) + x, (0.60 * scal) + y, (0.10 * scal) + z);
-	glVertex3f((0.00 * scal) + x, (0.20 * scal) + y, (0.00 * scal) + z);
 	glVertex3f((0.20 * scal) + x, (0.20 * scal) + y, (0.00 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.20 * scal) + y, (0.00 * scal) + z);
 	glEnd();
 
 
@@ -1638,8 +1589,8 @@ void DrawStar(const float width, const float length, const float height)
 	//24
 	glBegin(GL_TRIANGLES);
 	glVertex3f((0.10 * scal) + x, (0.60 * scal) + y, (0.10 * scal) + z);
-	glVertex3f((0.00 * scal) + x, (0.20 * scal) + y, (0.20 * scal) + z);
 	glVertex3f((0.00 * scal) + x, (0.20 * scal) + y, (0.00 * scal) + z);
+	glVertex3f((0.00 * scal) + x, (0.20 * scal) + y, (0.20 * scal) + z);
 	glEnd();
 
 }
@@ -1664,38 +1615,40 @@ void DrawSkybox(const float s)
 	glEnable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);
 
-	// Back wall
-	glBindTexture(GL_TEXTURE_2D, textures[TID_SKYBACK]);  // Specify which texture will be used   
-	glBegin(GL_QUADS);
-	glColor3f(0.0f, 0.0f, 1.0f);
-	glTexCoord2f(0.0, 1.0);
-	glVertex3f(-s2, -s2, -s2);
-	glTexCoord2f(1.0, 1.0);
-	glVertex3f(s2, -s2, -s2);
-	glTexCoord2f(1.0, 0.0);
-	glVertex3f(s2, s2, -s2);
-	glTexCoord2f(0.0, 0.0);
-	glVertex3f(-s2, s2, -s2);
-	glEnd();
+	
 
 	// Left wall
 	glBindTexture(GL_TEXTURE_2D, textures[TID_SKYLEFT]);
 	glBegin(GL_QUADS);
 	glColor3f(1.0f, 1.0f, 1.0f);
 	glTexCoord2f(0.0, 1.0);
-	glVertex3f(-s2, -s2, s2);
+	glVertex3f(-s2 + 4.2, -s2, s2);
 	glTexCoord2f(1.0, 1.0);
-	glVertex3f(-s2, -s2, -s2);
+	glVertex3f(-s2 + 4.2, -s2, -s2);
 	glTexCoord2f(1.0, 0.0);
-	glVertex3f(-s2, s2, -s2);
+	glVertex3f(-s2 + 4.2, s2, -s2);
 	glTexCoord2f(0.0, 0.0);
-	glVertex3f(-s2, s2, s2);
+	glVertex3f(-s2 + 4.2, s2, s2);
+	glEnd();
+
+	// Back2 wall
+	glBindTexture(GL_TEXTURE_2D, textures[TID_SKYBACK_2]);  // Specify which texture will be used   
+	glBegin(GL_QUADS);
+	glColor3f(1.0f, 1.0f, 1.0f);
+	glTexCoord2f(0.0, 1.0);
+	glVertex3f(-s2, -s2, -s2 + 4.7);
+	glTexCoord2f(1.0, 1.0);
+	glVertex3f(s2, -s2, -s2 + 4.7);
+	glTexCoord2f(1.0, 0.0);
+	glVertex3f(s2, s2, -s2 + 4.7);
+	glTexCoord2f(0.0, 0.0);
+	glVertex3f(-s2, s2, -s2 + 4.7);
 	glEnd();
 
 	// Bottom wall
 	glBindTexture(GL_TEXTURE_2D, textures[TID_SKYBOTTOM]);
 	glBegin(GL_QUADS);
-	glColor3f(0.0f, 0.0f, 1.0f);
+	glColor3f(1.0f, 1.0f, 1.0f);
 	glTexCoord2f(0.0, 1.0);
 	glVertex3f(-s2, -s2, s2);
 	glTexCoord2f(1.0, 1.0);
@@ -1709,43 +1662,43 @@ void DrawSkybox(const float s)
 	// Top wall
 	glBindTexture(GL_TEXTURE_2D, textures[TID_SKYTOP]);
 	glBegin(GL_QUADS);
-	glColor3f(0.0f, 0.0f, 1.0f);
+	glColor3f(1.0f, 1.0f, 1.0f);
 	glTexCoord2f(0.0, 1.0);
-	glVertex3f(-s2, s2, -s2);
+	glVertex3f(-s2, s2 - 2, -s2);
 	glTexCoord2f(1.0, 1.0);
-	glVertex3f(s2, s2, -s2);
+	glVertex3f(s2, s2 - 2, -s2);
 	glTexCoord2f(1.0, 0.0);
-	glVertex3f(s2, s2, s2);
+	glVertex3f(s2, s2 - 2, s2);
 	glTexCoord2f(0.0, 0.0);
-	glVertex3f(-s2, s2, s2);
+	glVertex3f(-s2, s2 - 2, s2);
 	glEnd();
 
 	// Right wall
 	glBindTexture(GL_TEXTURE_2D, textures[TID_SKYRIGHT]);
 	glBegin(GL_QUADS);
-	glColor3f(0.0f, 0.0f, 1.0f);
+	glColor3f(1.0f, 1.0f, 1.0f);
 	glTexCoord2f(0.0, 1.0);
-	glVertex3f(s2, -s2, -s2);
+	glVertex3f(s2 - 4.6, -s2, -s2);
 	glTexCoord2f(1.0, 1.0);
-	glVertex3f(s2, -s2, s2);
+	glVertex3f(s2 - 4.6, -s2, s2);
 	glTexCoord2f(1.0, 0.0);
-	glVertex3f(s2, s2, s2);
+	glVertex3f(s2 - 4.6, s2, s2);
 	glTexCoord2f(0.0, 0.0);
-	glVertex3f(s2, s2, -s2);
+	glVertex3f(s2 - 4.6, s2, -s2);
 	glEnd();
 
 	// Front wall
 	glBindTexture(GL_TEXTURE_2D, textures[TID_SKYFRONT]);
 	glBegin(GL_QUADS);
-	glColor3f(0.0f, 0.0f, 1.0f);
+	glColor3f(1.0f, 1.0f, 1.0f);
 	glTexCoord2f(0.0, 1.0);
-	glVertex3f(s2, -s2, s2);
+	glVertex3f(s2, -s2, s2 - 2);
 	glTexCoord2f(1.0, 1.0);
-	glVertex3f(-s2, -s2, s2);
+	glVertex3f(-s2, -s2, s2 - 2);
 	glTexCoord2f(1.0, 0.0);
-	glVertex3f(-s2, s2, s2);
+	glVertex3f(-s2, s2, s2 - 2);
 	glTexCoord2f(0.0, 0.0);
-	glVertex3f(s2, s2, s2);
+	glVertex3f(s2, s2, s2 - 2);
 	glEnd();
 
 	// Turn off texture mapping and enable lighting
