@@ -376,21 +376,36 @@ void DisplayFunc(void)
 	switch (cam_id) {
 	case 0:
 		// For the world-relative camera
+		glPushMatrix();
+			glRotatef(-elevation[0], 1, 0, 0);
+			glRotatef(-azimuth[0], 0, 1, 0);
+			DrawSkybox(SB_SIZE);	
+		glPopMatrix();
 		glTranslatef(0, 0, -distance[0]);
 		glRotatef(-elevation[0], 1, 0, 0);
 		glRotatef(-azimuth[0], 0, 1, 0);
+		
 		break;
 
 	case 1:
 		// For plane2's camera
-		glTranslatef(0, 0, -distance[1]);
-		glRotatef(-elevation[1], 1, 0, 0);
-		glRotatef(-azimuth[1], 0, 1, 0);
-
 		gmtl::set(aa, plane_q);                    // Converts plane's quaternion to axis-angle form to be used by glRotatef()
 		axis = aa.getAxis();
 		angle = aa.getAngle();
+
+		glPushMatrix();
+			glRotatef(-elevation[0], 1, 0, 0);
+			glRotatef(-azimuth[0], 0, 1, 0);
+			DrawSkybox(SB_SIZE);
+			glRotatef(-gmtl::Math::rad2Deg(angle), axis[0], axis[1], axis[2]);
+		glPopMatrix();
+
+		glTranslatef(0, 0, -distance[1]);
+		glRotatef(-elevation[1], 1, 0, 0);
+		glRotatef(-azimuth[1], 0, 1, 0);
 		glRotatef(-gmtl::Math::rad2Deg(angle), axis[0], axis[1], axis[2]);
+		
+
 		glTranslatef(-plane_p[0], -plane_p[1], -plane_p[2]);
 		
 		break;
@@ -419,7 +434,7 @@ void DisplayFunc(void)
 
 	// World node: draws world coordinate frame
 	DrawCoordinateFrame(10);
-	DrawSkybox(SB_SIZE);
+	
 
 	// World-relative camera:
 	if (cam_id != 0) {
