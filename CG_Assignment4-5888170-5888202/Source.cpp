@@ -1815,6 +1815,7 @@ int main(int argc, char **argv)
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);     // Uses GLUT_DOUBLE to enable double buffering
 	glutInitWindowSize(w_width, w_height);
 
+
 	glutCreateWindow("Plane Episode 3");
 
 	glutDisplayFunc(DisplayFunc);

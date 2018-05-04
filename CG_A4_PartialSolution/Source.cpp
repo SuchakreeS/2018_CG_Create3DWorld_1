@@ -105,6 +105,12 @@ const GLfloat DARKBROWN_COL[] = { 0.4, 0.05, 0.0, 1.0 };
 const GLfloat BRIGHTBROWN2_COL[] = { 0.55, 0.25, 0.0, 1.0 };
 const GLfloat DARKBROWN2_COL[] = { 0.05, 0.01, 0.0, 1.0 };
 
+const float ROT_AMOUNT = gmtl::Math::deg2Rad(1.0f);
+const float COSTHETA = cos(ROT_AMOUNT);
+gmtl::Matrix44f yrotp_mat;
+gmtl::Point4f p0, p1, p2, p3, p4, p5, p6, p7, p8;
+
+
 //|___________________
 //|
 //| Global Variables
@@ -147,7 +153,7 @@ float distance[3] = { 20.0f,  20.0f,  20.0f };        // Distance of the camera 
 float elevation[3] = { -45.0f, -45.0f,  -45.0f };     // Elevation of the camera. (in degs)
 float azimuth[3] = { 15.0f,  15.0f,  15.0f };         // Azimuth of the camera. (in degs)
 													  // Lighting
-gmtl::Point4f light_pos(0.0, 20.0, 20.0, 1.0);
+gmtl::Point4f light_pos(0.0, -12.0, 0.0, 1.0);
 bool is_diffuse_on = true;
 
 // Textures
@@ -177,6 +183,7 @@ void DrawCatBody(const float width, const float length, const float height);
 void DrawCatHead(const float width, const float length, const float height);
 void DrawCatEar(const float width, const float length, const float height);
 void DrawStar(const float width, const float length, const float height);
+void DrawCurcle(const float width, const float length, const float height);
 
 //|____________________________________________________________________
 //|
@@ -435,7 +442,7 @@ void DisplayFunc(void)
 	// World node: draws world coordinate frame
 	DrawCoordinateFrame(10);
 	
-
+	DrawCurcle(P_WIDTH + 2, P_LENGTH, P_HEIGHT);
 	// World-relative camera:
 	if (cam_id != 0) {
 		glPushMatrix();
@@ -573,6 +580,24 @@ void KeyboardFunc(unsigned char key, int x, int y)
 		break;
 	case 'k': // Light down (-Y translation)
 		light_pos[1]--;
+		printf("Light-Y = %.2f\n", light_pos[1]);
+		break;
+
+	case '7': // Light up (+Y translation)
+		light_pos[0]++;
+		printf("Light-Y = %.2f\n", light_pos[1]);
+		break;
+	case '8': // Light down (-Y translation)
+		light_pos[0]--;
+		printf("Light-Y = %.2f\n", light_pos[1]);
+		break;
+
+	case '4': // Light up (+Y translation)
+		light_pos[2]++;
+		printf("Light-Y = %.2f\n", light_pos[1]);
+		break;
+	case '5': // Light down (-Y translation)
+		light_pos[2]--;
 		printf("Light-Y = %.2f\n", light_pos[1]);
 		break;
 
@@ -1611,6 +1636,79 @@ void DrawStar(const float width, const float length, const float height)
 }
 
 
+void DrawCurcle(const float width, const float length, const float height) {
+	float x = -width * 0.15f + 0.2;
+	float y = width * 0.02f - 0.2;
+	float z = width * 0.25f - 0.8;
+	float scal = width * 2.f;
+	float h = 12.f;
+	const float COSTHETA = cos(ROT_AMOUNT);
+	const float SINTHETA = sin(ROT_AMOUNT);
+	yrotp_mat.set(COSTHETA, 0, SINTHETA, 0,
+		0, 1, 0, 0,
+		-SINTHETA, 0, COSTHETA, 0,
+		0, 0, 0, 1);
+	yrotp_mat.setState(gmtl::Matrix44f::ORTHOGONAL);
+	
+	//float p0[3], p1[3], p2[3], p3[3], p4[3], p5[3], temp[3];
+
+	p0.set(0, 0, 0, 1);
+	p8.set(0, h + 5, 0, 1);
+	p1.set(10, 0, 0, 1);
+	p6.set(12, h, 0, 1);
+	for (int i = 0; i < 360; i++) {
+		p2 = yrotp_mat * p1;
+		p7 = yrotp_mat * p6;
+		p3.set(p1[0], p1[1]+h, p1[2], p1[3]);
+		p4.set(p2[0], p2[1]+h, p2[2], p2[3]);
+		p5.set(p0[0], p0[1]+h, p0[2], p0[3]);
+		
+		glBegin(GL_TRIANGLES);
+		glVertex3f(p0[0] + x, p0[1] + y, p0[2] + z);
+		glVertex3f(p1[0] + x, p1[1] + y, p1[2] + z);
+		glVertex3f(p2[0] + x, p2[1] + y, p2[2] + z);
+		glEnd();
+
+		glBegin(GL_QUAD_STRIP);
+		glVertex3f(p1[0] + x, p1[1] + y, p1[2] + z);
+		glVertex3f(p3[0] + x, p3[1] + y, p3[2] + z);
+		glVertex3f(p2[0] + x, p2[1] + y, p2[2] + z);
+		glVertex3f(p4[0] + x, p4[1] + y, p4[2] + z);
+		glEnd();
+		/*
+		glBegin(GL_TRIANGLES);
+		glVertex3f(p5[0] + x, p5[1] + y, p5[2] + z);
+		glVertex3f(p3[0] + x, p3[1] + y, p3[2] + z);
+		glVertex3f(p4[0] + x, p4[1] + y, p4[2] + z);
+		glEnd();
+		*/
+
+		glBegin(GL_QUAD_STRIP);
+		glVertex3f(p3[0] + x, p3[1] + y, p3[2] + z);
+		glVertex3f(p4[0] + x, p4[1] + y, p4[2] + z);
+		glVertex3f(p6[0] + x, p6[1] + y, p6[2] + z);
+		glVertex3f(p7[0] + x, p7[1] + y, p7[2] + z);
+		glEnd();
+		/*
+		glBegin(GL_TRIANGLES);
+		glVertex3f(p8[0] + x, p8[1] + y, p8[2] + z);
+		glVertex3f(p6[0] + x, p6[1] + y, p6[2] + z);
+		glVertex3f(p7[0] + x, p7[1] + y, p7[2] + z);
+		glEnd();
+		*/
+		p1 = p2;
+		p6 = p7;
+	}
+
+
+	/*
+	glBegin(GL_TRIANGLES);
+	glVertex3f((0.00 * scal) + x, (0.00 * scal) + y, (0.20 * scal) + z);
+	glVertex3f((0.20 * scal) + x, (0.00 * scal) + y, (0.20 * scal) + z);
+	glVertex3f((0.10 * scal) + x, (-0.40 * scal) + y, (0.10 * scal) + z);
+	glEnd();
+	*/
+}
 
 //|____________________________________________________________________
 //|
