@@ -398,10 +398,11 @@ void DisplayFunc(void)
 		gmtl::set(aa, plane_q);                    // Converts plane's quaternion to axis-angle form to be used by glRotatef()
 		axis = aa.getAxis();
 		angle = aa.getAngle();
+
 		glPushMatrix();
-		glRotatef(-elevation[0], 1, 0, 0);
-		glRotatef(-azimuth[0], 0, 1, 0);
-		DrawSkybox(SB_SIZE);
+			glRotatef(-elevation[1], 1, 0, 0);
+			glRotatef(-azimuth[1], 0, 1, 0);
+			DrawSkybox(SB_SIZE);
 		glPopMatrix();
 		
 
