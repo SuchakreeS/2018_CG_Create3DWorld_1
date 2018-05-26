@@ -19,6 +19,7 @@
 |
 | Include Files
 |__________________*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -36,8 +37,7 @@
 const int WIN_WIDTH_INIT = 800;
 const int WIN_HEIGHT_INIT = 600;
 
-const float T_STEP = 0.005f;
-const float C_TSTEP = 0.0005f;
+const float C_TSTEP = 0.0005f;            // Curve time step (for rendering curve)
 
 const gmtl::Vec3f WORLD_UP(0, 1, 0);                  // World up axis (Y)
 
@@ -55,6 +55,7 @@ const gmtl::Point3f input_pts[PT_NB] =
 gmtl::Matrix44f MMAT;                                 // Basis matrix for Hermite curve form (const)
 
 const float R_MAX = 2.5f*1200.0f;                     // Expected maximum magnitude of local rightward component of plane's acceleration
+
 const int PARTICLE_NB = 40;                    		  // Number of particles
 
 const float VMAG_MEAN = 100.0f;                       // Velocity
@@ -72,8 +73,17 @@ const gmtl::Vec3f GRAVITY(0, -100.0f, 0);                 // w.r.t. world, can b
 
 const gmtl::Vec3f V_WIND(100, 0, 0);                  // Wind velocity and drag coefficient (K)
 const float K_COEF = 1.0f;
-													  // Keyboard modifiers
+
+// Keyboard modifiers
 enum KeyModifier { KM_SHIFT = 0, KM_CTRL, KM_ALT };
+
+const float ROT_AMOUNT = gmtl::Math::deg2Rad(1.0f);
+const float COSTHETA = cos(ROT_AMOUNT);
+gmtl::Matrix44f yrotp_mat;
+gmtl::Point4f p0, p1, p2, p3, p4, p5, p6, p7, p8;
+const float P_WIDTH = 3;
+const float P_LENGTH = 3;
+const float P_HEIGHT = 1.5f;
 
 /*___________________
 |
@@ -89,7 +99,41 @@ typedef struct _MyParticle {
 	int ttl_init;	  			// Initial ttl, used to fade color as the age increases
 } MyParticle;
 
-// Textures
+/*___________________
+|
+| Global variables
+|__________________*/
+
+// camera w.r.t. plane
+float distance = 100.0f;
+float elevation = -15.0f;                 // In degs
+float azimuth = 180.0f;                 // In degs
+
+										// Mouse & keyboard
+int mx_prev = 0, my_prev = 0;
+bool mbuttons[3] = { false, false, false };
+bool kmodifiers[3] = { false, false, false };
+
+gmtl::Vec3f tangents[PT_NB];                          // Tangent at each input point
+float s_tan = 1.0f;                                   // A scaling factor for tangents
+
+gmtl::Matrix44f Cmats[PT_NB];                         // Coefficient matrix (C) for each Hermite curve segment (It's actually 4x3, ignore last column)
+
+gmtl::Matrix44f ppose;                                // The plane's pose
+gmtl::Matrix44f pposeadj;                             // Adjusted plane coordinate system that the (plane) camera will be attached to
+gmtl::Matrix44f pposeadj_inv;                         // Adjusted plane coordinate system (plane's camera is attached to this frame), inverted 
+int ps = 0;                                        // The segment in which the plane currently belongs
+float pt = 0;                                        // The current t-value for the plane 
+float pdt = 0.02f;                                    // delta_t for the plane
+
+MyParticle particles[PARTICLE_NB];    			          // Array of particles
+
+GLuint texture;
+
+// Rendering option
+bool render_curve = true;
+bool render_constraint = false;
+
 enum TextureID { TID_SKYBACK, TID_SKYBACK_2, TID_SKYLEFT, TID_SKYBOTTOM, TID_SKYTOP, TID_SKYRIGHT, TID_SKYFRONT, TEXTURE_NB };  // Texture IDs, with the last ID indicating the total number of textures
 const GLfloat NO_LIGHT[] = { 0.0, 0.0, 0.0, 1.0 };
 const GLfloat AMBIENT_LIGHT[] = { 0.9, 0.9, 0.9, 1.0 };
@@ -119,43 +163,6 @@ const GLfloat DARKBROWN2_COL[] = { 0.05, 0.01, 0.0, 1.0 };
 
 /*___________________
 |
-| Global variables
-|__________________*/
-
-// camera w.r.t. plane
-float distance = 200.0f;
-float elevation = -15.0f;                 // In degs
-float azimuth = 180.0f;                 // In degs
-
-										// Mouse & keyboard
-int mx_prev = 0, my_prev = 0;
-bool mbuttons[3] = { false, false, false };
-bool kmodifiers[3] = { false, false, false };
-
-gmtl::Vec3f tangents[PT_NB];                          // Tangent at each input point
-float s_tan = 1.0f;                                   // A scaling factor for tangents
-
-gmtl::Matrix44f Cmats[PT_NB];                         // Coefficient matrix (C) for each Hermite curve segment (It's actually 4x3, ignore last column)
-
-gmtl::Matrix44f ppose;                                // The plane's pose
-gmtl::Matrix44f pposeadj;                             // Adjusted plane coordinate system that the (plane) camera will be attached to
-gmtl::Matrix44f pposeadj_inv;                         // Adjusted plane coordinate system (plane's camera is attached to this frame), inverted 
-int ps = 0;                                        // The segment in which the plane currently belongs
-float pt = 0;                                        // The current t-value for the plane 
-float pdt = 0.02f;                                    // delta_t for the plane
-
-MyParticle particles[PARTICLE_NB];    			          // Array of particles
-
-GLuint texture;
-													  // Rendering option
-bool render_curve = true;
-bool render_constraint = false;
-
-
-gmtl::Point4f light_pos(5.0, 20.0, 200.0, 1.0);
-bool is_diffuse_on = true;
-/*___________________
-|
 | Function Prototypes
 |__________________*/
 
@@ -180,12 +187,11 @@ void LoadPPM(char *fname, unsigned int *w, unsigned int *h, unsigned char **data
 
 void DrawBroom(const float width, const float length, const float height);
 void DrawCatHead(const float width, const float length, const float height);
+void DrawCurcle(const float width, const float length, const float height);
 
 void SetLight(const gmtl::Point4f &pos, const bool is_ambient, const bool is_diffuse, const bool is_specular);
 
 void DrawSkybox(const float s);
-void LoadPPM(const char *fname, unsigned int *w, unsigned int *h, unsigned char **data, const int mallocflag);
-
 
 /*____________________________________________________________________
 |
@@ -209,7 +215,6 @@ int main(int argc, char **argv)
 	glutMouseFunc(Mouse_Func);
 	glutMotionFunc(Motion_Func);
 
-
 	Init();
 
 	glutMainLoop();
@@ -230,11 +235,11 @@ void Init()
 	int i;
 	unsigned int texwidth, texheight;
 	unsigned char *imagedata;
+	char smoketex[50] = "smoketex_3.ppm";
 	// OpenGL
 	glClearColor(0, 0, 0, 0);
 	glEnable(GL_DEPTH_TEST);
 	glShadeModel(GL_SMOOTH);
-	char smoketex[50] = "smoketex.ppm";
 
 	// Inits Hermite basis matrix
 	MMAT.set(
@@ -260,6 +265,7 @@ void Init()
 	|
 	| Load texture
 	|___________________________________________________________________*/
+
 	// describe how data will be stored in memory
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -318,7 +324,6 @@ void Init_AParticle(MyParticle &par)
 	// ttl
 	par.ttl = par.ttl_init = (rand() % TTL_BASE) + TTL_OFFSET;
 
-	// Inits tangents and coefficient matrices
 	Compute_Tangents();
 	Compute_Coefficiences();
 
@@ -428,7 +433,6 @@ void Init_AParticle(MyParticle &par)
 	free(img_data);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
 }
 
 /*____________________________________________________________________
@@ -519,14 +523,15 @@ void Display_Func(void)
 	glRotatef(-azimuth, 0, 1, 0);
 	glMultMatrixf(pposeadj_inv.mData);
 
-	SetLight(light_pos, true, is_diffuse_on, true);
-	//Draw_World_Axes();
+	Draw_World_Axes();
 	Draw_Path();
-	DrawBroom(1.0f, 1.0f, 1.0f);
-	DrawCatHead(1.0f, 1.0f, 1.0f);
+	//Draw_Rocket();
+	DrawBroom(2.0f, 2.0f, 2.0f);
+	DrawCatHead(2.0f, 2.0f, 2.0f);
 	Draw_Particles();
 	DrawSkybox(SB_SIZE);
-
+	DrawCurcle(P_WIDTH + 2, P_LENGTH, P_HEIGHT);
+	DrawCurcle(P_WIDTH + 2 + 700, P_LENGTH + 300, P_HEIGHT);
 	// Display!
 	glutSwapBuffers();
 }
@@ -542,7 +547,7 @@ void Display_Func(void)
 void Idle_Func()
 {
 	Update_Plane();
-	// Update_PSystem();
+	Update_PSystem();
 
 	glutPostRedisplay();
 }
@@ -564,7 +569,6 @@ void Update_Plane()
 	float ra;                         // Roll angle
 	gmtl::AxisAnglef roll_aa;         // Local roll in axis angle and matrix forms
 	gmtl::Matrix44f roll_mat;
-	//gmtl::Matrix44f pposeadj;         // Adjusted plane coordinate system that the (plane) camera will be attached to
 	gmtl::Vec3f zadj;
 
 	/*____________________________________________________________________
@@ -673,8 +677,15 @@ void Update_Plane()
 	pposeadj.setState(gmtl::Matrix44f::AFFINE);
 
 	gmtl::invert(pposeadj_inv, pposeadj);
-
 }
+
+/*____________________________________________________________________
+|
+| Function: Update_PSystem
+|
+| Input:
+| Output: Called every simulation step to update the particle system.
+|___________________________________________________________________*/
 
 void Update_PSystem()
 {
@@ -891,28 +902,6 @@ void Draw_Path()
 			glPopMatrix();
 		}
 	}
-	if (render_curve) {
-		glColor3f(0, 1, 0);
-		for (i = 0; i<PT_NB; i++) {
-			// Draw each segment
-			glBegin(GL_LINE_STRIP);
-			for (t = 0; t <= 1; t += C_TSTEP) {
-				// Simple polynomial evaluation
-				//float t2 = t*t;
-				//float t3 = t2*t;
-				//x = Cmats[i][0][0]*t3 + Cmats[i][1][0]*t2 + Cmats[i][2][0]*t + Cmats[i][3][0];
-				//y = Cmats[i][0][1]*t3 + Cmats[i][1][1]*t2 + Cmats[i][2][1]*t + Cmats[i][3][1];
-				//z = Cmats[i][0][2]*t3 + Cmats[i][1][2]*t2 + Cmats[i][2][2]*t + Cmats[i][3][2];
-
-				// Use Horner's rule for slight speedup
-				x = ((Cmats[i][0][0] * t + Cmats[i][1][0])*t + Cmats[i][2][0])*t + Cmats[i][3][0];
-				y = ((Cmats[i][0][1] * t + Cmats[i][1][1])*t + Cmats[i][2][1])*t + Cmats[i][3][1];
-				z = ((Cmats[i][0][2] * t + Cmats[i][1][2])*t + Cmats[i][2][2])*t + Cmats[i][3][2];
-				glVertex3f(x, y, z);
-			}
-			glEnd();
-		}
-	}
 
 	/*____________________________________________________________________
 	|
@@ -924,7 +913,7 @@ void Draw_Path()
 		for (i = 0; i<PT_NB; i++) {
 			// Draw each segment
 			glBegin(GL_LINE_STRIP);
-			for (t = 0; t <= 1; t += T_STEP) {
+			for (t = 0; t <= 1; t += C_TSTEP) {
 				// Simple polynomial evaluation
 				//float t2 = t*t;
 				//float t3 = t2*t;
@@ -1057,6 +1046,206 @@ void Draw_Rocket()
 	glPopMatrix();
 }
 
+/*____________________________________________________________________
+|
+| Function: Draw_Particles
+|
+| Input:
+| Output: Draw particles as view-oriented billboards.
+|___________________________________________________________________*/
+
+void Draw_Particles()
+{
+	int i;
+	gmtl::Matrix44f cam_mat;                    // Camera matrix
+	gmtl::Matrix44f dt_mat, el_mat, az_mat;     // distance, elevation, and azimuth matrices, initialized to IDENTITY
+	float age_scale;                            // Age factor
+
+												/*____________________________________________________________________
+												|
+												| Enable texturing and blending
+												|___________________________________________________________________*/
+
+	glEnable(GL_TEXTURE_2D);
+	glDisable(GL_LIGHTING);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	//glDepthMask(GL_FALSE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE);
+
+	/*____________________________________________________________________
+	|
+	| Orient billboards to face the camera
+	|___________________________________________________________________*/
+
+	// Set distance matrix
+	dt_mat[2][3] = distance;
+
+	// Set elevation matrix
+	gmtl::set(el_mat,
+		gmtl::AxisAnglef(gmtl::Math::deg2Rad(elevation), 1, 0, 0)
+	);
+
+	// Set azimuth matrix
+	gmtl::set(az_mat,
+		gmtl::AxisAnglef(gmtl::Math::deg2Rad(azimuth), 0, 1, 0)
+	);
+
+	// Compute camera w.r.t. world and discard translation
+	cam_mat = pposeadj * az_mat * el_mat * dt_mat;
+	cam_mat[0][3] = cam_mat[1][3] = cam_mat[2][3] = 0;
+
+	/*____________________________________________________________________
+	|
+	| Render particles as billboards
+	|___________________________________________________________________*/
+
+	for (i = 0; i<PARTICLE_NB; i++) {
+		glPushMatrix();
+		glTranslatef(particles[i].p[0], particles[i].p[1], particles[i].p[2]);
+		glMultMatrixf(cam_mat.mData);       // Orient billboards to face camera
+		glBegin(GL_QUADS);
+		age_scale = ((float)particles[i].ttl) / particles[i].ttl_init;
+		glColor3f(age_scale, age_scale, age_scale);
+		glTexCoord2f(0.0, 0.0);
+		glVertex3f(-SMOKE_SIZE, -SMOKE_SIZE, 0.0);
+		glTexCoord2f(1.0, 0.0);
+		glVertex3f(SMOKE_SIZE, -SMOKE_SIZE, 0.0);
+		glTexCoord2f(1.0, 1.0);
+		glVertex3f(SMOKE_SIZE, SMOKE_SIZE, 0.0);
+		glTexCoord2f(0.0, 1.0);
+		glVertex3f(-SMOKE_SIZE, SMOKE_SIZE, 0.0);
+		glEnd();
+		glPopMatrix();
+	}
+
+	/*____________________________________________________________________
+	|
+	| Restore rendering states
+	|___________________________________________________________________*/
+
+	glDisable(GL_BLEND);
+	glDepthMask(GL_TRUE);
+	glDisable(GL_TEXTURE_2D);
+}
+
+/*
+Random number generator by Donald H. House.
+Modified to compile on Visual Studio.Net 2003
+*/
+float FastGauss(float mean, float std)
+{
+#define RESOLUTION 2500
+	static float lookup[RESOLUTION + 1];
+
+#define itblmax    20    
+	/* length - 1 of table describing F inverse */
+#define didu    40.0    
+	/* delta table position / delta ind. variable           itblmax / 0.5 */
+
+	static float tbl[] =
+	{ 0.00000E+00, 6.27500E-02, 1.25641E-01, 1.89000E-01,
+		2.53333E-01, 3.18684E-01, 3.85405E-01, 4.53889E-01,
+		5.24412E-01, 5.97647E-01, 6.74375E-01, 7.55333E-01,
+		8.41482E-01, 9.34615E-01, 1.03652E+00, 1.15048E+00,
+		1.28167E+00, 1.43933E+00, 1.64500E+00, 1.96000E+00,
+		3.87000E+00 };
+
+	static int hereb4;
+	//static struct timeval tv;
+
+	float u, di, delta/*, result*/;
+	int i, index, minus = 1;
+
+	if (!hereb4) {
+		for (i = 0; i <= RESOLUTION; i++) {
+			if ((u = i / (float)RESOLUTION) > 0.5) {
+				minus = 0;
+				u -= 0.5;
+			}
+
+			/* interpolate gaussian random number using table */
+
+			index = (int)(di = (didu * u));
+			di -= (float)index;
+			delta = tbl[index] + (tbl[index + 1] - tbl[index]) * di;
+			lookup[i] = (minus ? -delta : delta);
+		}
+
+		/*gettimeofday(&tv, NULL);
+		srand((unsigned int)tv.tv_usec);*/
+		srand((unsigned)time(NULL));
+		hereb4 = 1;
+	}
+
+	i = rand() / (RAND_MAX / RESOLUTION) + 1;
+	if (i > RESOLUTION) {
+		i = RESOLUTION;
+	}
+
+	return(mean + std * lookup[i]);
+}
+
+/*____________________________________________________________________
+|
+| Function: LoadPPM
+|
+| Input:
+| Output: Draw world axes.
+|  LoadPPM - a minimal Portable Pixelformat image file loader
+|  fname: name of file to load (input)
+|  w: width of loaded image in pixels (output)
+|  h: height of loaded image in pixels (output)
+|  data: image data address (input or output depending on mallocflag)
+|  mallocflag: 1 if memory not pre-allocated, 0 if data already points
+|              to allocated memory that can hold the image. Note that
+|              if new memory is allocated, free() should be used to
+|              deallocate when it is no longer needed.
+|___________________________________________________________________*/
+
+void LoadPPM(char *fname, unsigned int *w, unsigned int *h, unsigned char **data, int mallocflag)
+{
+	FILE *fp;
+	char P, num;
+	int max;
+	char s[1000];
+
+	if (!(fp = fopen(fname, "rb")))
+	{
+		perror("cannot open image file\n");
+		exit(0);
+	}
+
+	fscanf(fp, "%c%c\n", &P, &num);
+	if ((P != 'P') || (num != '6'))
+	{
+		perror("unknown file format for image\n");
+		exit(0);
+	}
+
+	do
+	{
+		fgets(s, 999, fp);
+	} while (s[0] == '#');
+
+
+	sscanf(s, "%d%d", w, h);
+	fgets(s, 999, fp);
+	sscanf(s, "%d", &max);
+
+	if (mallocflag)
+		if (!(*data = (unsigned char *)malloc(*w * *h * 3)))
+		{
+			perror("cannot allocate memory for image data\n");
+			exit(0);
+		}
+
+	fread(*data, 3, *w * *h, fp);
+
+	fclose(fp);
+}
+
+
 
 void DrawSkybox(const float s)
 {
@@ -1153,52 +1342,9 @@ void DrawSkybox(const float s)
 	glEnd();
 
 	// Turn off texture mapping and enable lighting
-	glEnable(GL_LIGHTING);
+	//glEnable(GL_LIGHTING);
 	glDisable(GL_TEXTURE_2D);
 }
-
-void LoadPPM(const char *fname, unsigned int *w, unsigned int *h, unsigned char **data, const int mallocflag)
-{
-	FILE *fp;
-	char P, num;
-	int max;
-	char s[1000];
-
-	if (!(fp = fopen(fname, "rb")))
-	{
-		perror("cannot open image file\n");
-		exit(0);
-	}
-
-	fscanf(fp, "%c%c\n", &P, &num);
-	if ((P != 'P') || (num != '6'))
-	{
-		perror("unknown file format for image\n");
-		exit(0);
-	}
-
-	do
-	{
-		fgets(s, 999, fp);
-	} while (s[0] == '#');
-
-
-	sscanf(s, "%d%d", w, h);
-	fgets(s, 999, fp);
-	sscanf(s, "%d", &max);
-
-	if (mallocflag)
-		if (!(*data = (unsigned char *)malloc(*w * *h * 3)))
-		{
-			perror("cannot allocate memory for image data\n");
-			exit(0);
-		}
-
-	fread(*data, 3, *w * *h, fp);
-
-	fclose(fp);
-}
-
 
 
 void DrawBroom(const float width, const float length, const float height)
@@ -1492,157 +1638,6 @@ void DrawBroom(const float width, const float length, const float height)
 	glPopMatrix();
 }
 
-void Draw_Particles()
-{
-  int i;
-  gmtl::Matrix44f cam_mat;                    // Camera matrix
-  gmtl::Matrix44f dt_mat, el_mat, az_mat;     // distance, elevation, and azimuth matrices, initialized to IDENTITY
-  float age_scale;                            // Age factor
-
-/*____________________________________________________________________
-|
-| Enable texturing and blending
-|___________________________________________________________________*/
-
-  glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glDepthMask(GL_FALSE);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE);
-
-/*____________________________________________________________________
-|
-| Orient billboards to face the camera
-|___________________________________________________________________*/
-
-	// Set distance matrix
-  dt_mat[2][3] = distance;
-
-  // Set elevation matrix
-  gmtl::set(el_mat,
-    gmtl::AxisAnglef(gmtl::Math::deg2Rad(elevation), 1, 0, 0)
-  );
-
-  // Set azimuth matrix
-  gmtl::set(az_mat,
-    gmtl::AxisAnglef(gmtl::Math::deg2Rad(azimuth), 0, 1, 0)
-  );
-
-  // Compute camera w.r.t. world and discard translation
-  cam_mat = pposeadj * az_mat * el_mat * dt_mat;
-  cam_mat[0][3] = cam_mat[1][3] = cam_mat[2][3] = 0;
-
-/*____________________________________________________________________
-|
-| Render particles as billboards
-|___________________________________________________________________*/
-
-  for(i=0; i<PARTICLE_NB; i++) {
-    glPushMatrix();
-      glTranslatef(particles[i].p[0], particles[i].p[1], particles[i].p[2]);
-      glMultMatrixf(cam_mat.mData);       // Orient billboards to face camera
-	    glBegin(GL_QUADS);
-        age_scale = ((float)particles[i].ttl)/particles[i].ttl_init;
-		    glColor3f(age_scale, age_scale, age_scale);
-		    glTexCoord2f(0.0, 0.0);
-		    glVertex3f(-SMOKE_SIZE, -SMOKE_SIZE, 0.0);
-		    glTexCoord2f(1.0, 0.0);
-		    glVertex3f( SMOKE_SIZE, -SMOKE_SIZE, 0.0);
-		    glTexCoord2f(1.0, 1.0);
-		    glVertex3f( SMOKE_SIZE,  SMOKE_SIZE, 0.0);
-		    glTexCoord2f(0.0, 1.0);
-		    glVertex3f(-SMOKE_SIZE,  SMOKE_SIZE, 0.0);
-	    glEnd();
-    glPopMatrix();
-  }
-
-/*____________________________________________________________________
-|
-| Restore rendering states
-|___________________________________________________________________*/
-
-  glDisable(GL_BLEND);
-  glDepthMask(GL_TRUE);
-  glDisable(GL_TEXTURE_2D);
-}
-
-/*
-	Random number generator by Donald H. House.
-	Modified to compile on Visual Studio.Net 2003
-*/
-float FastGauss(float mean, float std)
-{
-	#define RESOLUTION 2500
-	static float lookup[RESOLUTION+1];
-
-	#define itblmax    20    
-	/* length - 1 of table describing F inverse */
-	#define didu    40.0    
-	/* delta table position / delta ind. variable           itblmax / 0.5 */
-
-	static float tbl[] =
-		{0.00000E+00, 6.27500E-02, 1.25641E-01, 1.89000E-01,
-		 2.53333E-01, 3.18684E-01, 3.85405E-01, 4.53889E-01,
-		 5.24412E-01, 5.97647E-01, 6.74375E-01, 7.55333E-01,
-		 8.41482E-01, 9.34615E-01, 1.03652E+00, 1.15048E+00,
-		 1.28167E+00, 1.43933E+00, 1.64500E+00, 1.96000E+00,
-		 3.87000E+00};
-  
-	static int hereb4;
-	//static struct timeval tv;
-
-	float u, di, delta/*, result*/;
-	int i, index, minus = 1;
-
-	if (!hereb4) {
-		for (i = 0; i <= RESOLUTION; i++) {
-			if ((u = i/(float)RESOLUTION) > 0.5) {
-				minus = 0;
-				u -= 0.5;
-			}
-
-			/* interpolate gaussian random number using table */
-
-			index = (int)(di = (didu * u));
-			di -= (float)index;
-			delta =  tbl[index] + (tbl[index + 1] - tbl[index]) * di;
-			lookup[i] = (minus ? -delta : delta);
-		} 
-
-		/*gettimeofday(&tv, NULL);
-		srand((unsigned int)tv.tv_usec);*/
-		srand( (unsigned)time( NULL ) );
-		hereb4 = 1;
-	}
-
-	i = rand()/(RAND_MAX/RESOLUTION)+1;
-	if (i > RESOLUTION) {
-		i = RESOLUTION;
-	}
-
-	return(mean + std * lookup[i]);
-}
-
-
-void DrawCatBody(const float width, const float length, const float height)
-{
-	float x = -width * 0.15f;
-	float y = width * 0.02f - 3;
-	float z = width * 0.25f - 2.2;
-	float scal = width * 0.75f;
-
-	float x2 = 0;
-	float y2 = 0;
-	float z2 = 0;
-	float scal2 = width * 0.50f;
-
-	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, DARKPURPLE_COL);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, BRIGHTPURPLE_COL);
-	glNormal3f(0.0f, 1.0f, 0.0f);
-
-
-	glPopMatrix();
-}
 
 
 void DrawCatHead(const float width, const float length, const float height)
@@ -1972,44 +1967,79 @@ void SetLight(const gmtl::Point4f &pos, const bool is_ambient, const bool is_dif
 	}
 }
 
-void LoadPPM(char *fname, unsigned int *w, unsigned int *h, unsigned char **data, int mallocflag)
-{
-	FILE *fp;
-	char P, num;
-	int max;
-	char s[1000];
+void DrawCurcle(const float width, const float length, const float height) {
+	float x = -width * 0.15f + 30.2;
+	float y = width * 0.02f - 150.2;
+	float z = width * 0.25f - 30.8;
+	float scal = width * 2.f;
+	float h = 150.f;
+	const float COSTHETA = cos(ROT_AMOUNT);
+	const float SINTHETA = sin(ROT_AMOUNT);
+	yrotp_mat.set(COSTHETA, 0, SINTHETA, 0,
+		0, 1, 0, 0,
+		-SINTHETA, 0, COSTHETA, 0,
+		0, 0, 0, 1);
+	yrotp_mat.setState(gmtl::Matrix44f::ORTHOGONAL);
 
-	if (!(fp = fopen(fname, "rb")))
-	{
-		perror("cannot open image file\n");
-		exit(0);
+	//float p0[3], p1[3], p2[3], p3[3], p4[3], p5[3], temp[3];
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, DARKPURPLE_COL);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, BRIGHTPURPLE_COL);
+	glNormal3f(0.0f, 1.0f, 0.0f);
+	glColor3f(0.51f, 0.33f, 0.53f);
+	p0.set(0, 0, 0, 1);
+	p8.set(0, h + 50, 0, 1);
+	p1.set(20, 0, 0, 1);
+	p6.set(30, h, 0, 1);
+	for (int i = 0; i < 360; i++) {
+		p2 = yrotp_mat * p1;
+		p7 = yrotp_mat * p6;
+		p3.set(p1[0], p1[1] + h, p1[2], p1[3]);
+		p4.set(p2[0], p2[1] + h, p2[2], p2[3]);
+		p5.set(p0[0], p0[1] + h, p0[2], p0[3]);
+
+		glBegin(GL_TRIANGLES);
+		glVertex3f(p0[0] + x, p0[1] + y, p0[2] + z);
+		glVertex3f(p1[0] + x, p1[1] + y, p1[2] + z);
+		glVertex3f(p2[0] + x, p2[1] + y, p2[2] + z);
+		glEnd();
+
+		glBegin(GL_QUAD_STRIP);
+		glVertex3f(p1[0] + x, p1[1] + y, p1[2] + z);
+		glVertex3f(p3[0] + x, p3[1] + y, p3[2] + z);
+		glVertex3f(p2[0] + x, p2[1] + y, p2[2] + z);
+		glVertex3f(p4[0] + x, p4[1] + y, p4[2] + z);
+		glEnd();
+		/*
+		glBegin(GL_TRIANGLES);
+		glVertex3f(p5[0] + x, p5[1] + y, p5[2] + z);
+		glVertex3f(p3[0] + x, p3[1] + y, p3[2] + z);
+		glVertex3f(p4[0] + x, p4[1] + y, p4[2] + z);
+		glEnd();
+		*/
+
+		glBegin(GL_QUAD_STRIP);
+		glVertex3f(p3[0] + x, p3[1] + y, p3[2] + z);
+		glVertex3f(p4[0] + x, p4[1] + y, p4[2] + z);
+		glVertex3f(p6[0] + x, p6[1] + y, p6[2] + z);
+		glVertex3f(p7[0] + x, p7[1] + y, p7[2] + z);
+		glEnd();
+
+		glBegin(GL_TRIANGLES);
+		glVertex3f(p8[0] + x, p8[1] + y, p8[2] + z);
+		glVertex3f(p6[0] + x, p6[1] + y, p6[2] + z);
+		glVertex3f(p7[0] + x, p7[1] + y, p7[2] + z);
+		glEnd();
+
+		p1 = p2;
+		p6 = p7;
 	}
 
-	fscanf(fp, "%c%c\n", &P, &num);
-	if ((P != 'P') || (num != '6'))
-	{
-		perror("unknown file format for image\n");
-		exit(0);
-	}
 
-	do
-	{
-		fgets(s, 999, fp);
-	} while (s[0] == '#');
-
-
-	sscanf(s, "%d%d", w, h);
-	fgets(s, 999, fp);
-	sscanf(s, "%d", &max);
-
-	if (mallocflag)
-		if (!(*data = (unsigned char *)malloc(*w * *h * 3)))
-		{
-			perror("cannot allocate memory for image data\n");
-			exit(0);
-		}
-
-	fread(*data, 3, *w * *h, fp);
-
-	fclose(fp);
+	/*
+	glBegin(GL_TRIANGLES);
+	glVertex3f((0.00 * scal) + x, (0.00 * scal) + y, (0.20 * scal) + z);
+	glVertex3f((0.20 * scal) + x, (0.00 * scal) + y, (0.20 * scal) + z);
+	glVertex3f((0.10 * scal) + x, (-0.40 * scal) + y, (0.10 * scal) + z);
+	glEnd();
+	*/
 }
