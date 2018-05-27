@@ -37,7 +37,7 @@
 const int WIN_WIDTH_INIT = 800;
 const int WIN_HEIGHT_INIT = 600;
 
-const float C_TSTEP = 0.0005f;            // Curve time step (for rendering curve)
+const float C_TSTEP = 0.00035f;            // Curve time step (for rendering curve)
 
 const gmtl::Vec3f WORLD_UP(0, 1, 0);                  // World up axis (Y)
 
@@ -65,7 +65,7 @@ const float VDIR_STD = 0.25f;
 const int TTL_BASE = 200;                          // Time to live
 const int TTL_OFFSET = 50;
 
-const float SMOKE_SIZE = 15;                         // Smoke size
+const float SMOKE_SIZE = 1;                         // Smoke size
 
 const float S_TSTEP = 0.001f;                          // Simulation time step (for particle update)
 
@@ -133,6 +133,8 @@ GLuint texture;
 // Rendering option
 bool render_curve = true;
 bool render_constraint = false;
+gmtl::Point4f light_pos(5.0, 20.0, 200.0, 1.0);
+bool is_diffuse_on = true;
 
 enum TextureID { TID_SKYBACK, TID_SKYBACK_2, TID_SKYLEFT, TID_SKYBOTTOM, TID_SKYTOP, TID_SKYRIGHT, TID_SKYFRONT, TEXTURE_NB };  // Texture IDs, with the last ID indicating the total number of textures
 const GLfloat NO_LIGHT[] = { 0.0, 0.0, 0.0, 1.0 };
@@ -523,9 +525,9 @@ void Display_Func(void)
 	glRotatef(-azimuth, 0, 1, 0);
 	glMultMatrixf(pposeadj_inv.mData);
 
-	Draw_World_Axes();
+	//Draw_World_Axes();
+	SetLight(light_pos, true, is_diffuse_on, true);
 	Draw_Path();
-	//Draw_Rocket();
 	DrawBroom(2.0f, 2.0f, 2.0f);
 	DrawCatHead(2.0f, 2.0f, 2.0f);
 	Draw_Particles();
@@ -912,7 +914,6 @@ void Draw_Path()
 		glColor3f(0, 1, 0);
 		for (i = 0; i<PT_NB; i++) {
 			// Draw each segment
-			glBegin(GL_LINE_STRIP);
 			for (t = 0; t <= 1; t += C_TSTEP) {
 				// Simple polynomial evaluation
 				//float t2 = t*t;
@@ -927,7 +928,6 @@ void Draw_Path()
 				z = ((Cmats[i][0][2] * t + Cmats[i][1][2])*t + Cmats[i][2][2])*t + Cmats[i][3][2];
 				glVertex3f(x, y, z);
 			}
-			glEnd();
 		}
 	}
 }
@@ -1127,6 +1127,7 @@ void Draw_Particles()
 	glDisable(GL_BLEND);
 	glDepthMask(GL_TRUE);
 	glDisable(GL_TEXTURE_2D);
+	glEnable(GL_LIGHTING);
 }
 
 /*
@@ -1138,7 +1139,7 @@ float FastGauss(float mean, float std)
 #define RESOLUTION 2500
 	static float lookup[RESOLUTION + 1];
 
-#define itblmax    20    
+#define itblmax    20  
 	/* length - 1 of table describing F inverse */
 #define didu    40.0    
 	/* delta table position / delta ind. variable           itblmax / 0.5 */
@@ -1342,7 +1343,7 @@ void DrawSkybox(const float s)
 	glEnd();
 
 	// Turn off texture mapping and enable lighting
-	//glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHTING);
 	glDisable(GL_TEXTURE_2D);
 }
 
