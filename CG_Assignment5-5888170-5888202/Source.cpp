@@ -530,8 +530,8 @@ void Display_Func(void)
 	Draw_Path();
 	DrawBroom(2.0f, 2.0f, 2.0f);
 	DrawCatHead(2.0f, 2.0f, 2.0f);
-	Draw_Particles();
 	DrawSkybox(SB_SIZE);
+	Draw_Particles();
 	DrawCurcle(P_WIDTH + 2, P_LENGTH, P_HEIGHT);
 	DrawCurcle(P_WIDTH + 2 + 700, P_LENGTH + 300, P_HEIGHT);
 	// Display!
