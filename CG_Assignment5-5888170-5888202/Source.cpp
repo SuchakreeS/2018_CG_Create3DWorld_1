@@ -1,13 +1,21 @@
-/*____________________________________________________________________
-|
-| File: main.cpp
-|
-| Description: Hermite curve drawing.
-|
-| Functions:
-|
-| (C) Copyright 2007 Mores Prachyabrued
-|___________________________________________________________________*/
+/*
+____________________________________________________________________
+ File: main.cpp
+ Description: Hermite curve drawing.
+ Functions:
+ (C) Copyright 2007 Mores Prachyabrued
+____________________________________________________________________
+
+This is Final Assignment in ITCS481_Computer Graphics Class
+Team Member:
+Suchakree Sawangwong	5888170	Sec.1	(Faculty of ICT, Mahidol University, Thailand)
+Amonnat Tengputtipong	5888202	Sec.1	(Feculty of ICT, Mahidol University, Thailand)
+____________________________________________________________________
+*/
+
+
+
+
 
 // Enable older CRT functions (such as strcpy) without warnings from vc8 (vc 2005 .net)
 #if _MSC_VER >= 1400
@@ -15,33 +23,23 @@
 #define _CRT_NONSTDC_NO_DEPRECATE
 #endif
 
-/*___________________
-|
-| Include Files
-|__________________*/
 
+//	Include Files
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
-
 #include <gmtl/gmtl.h>
-
 #include <GL/glut.h>
 
-/*___________________
-|
-| Constants
-|__________________*/
+
+//Constants
 
 const int WIN_WIDTH_INIT = 800;
 const int WIN_HEIGHT_INIT = 600;
-
-const float C_TSTEP = 0.00035f;            // Curve time step (for rendering curve)
-
-const gmtl::Vec3f WORLD_UP(0, 1, 0);                  // World up axis (Y)
-
-const int PT_NB = 6;                                  // Number of input points (equals #tangents and #segments)
+const float C_TSTEP = 0.00035f;							// Curve time step (for rendering curve)
+const gmtl::Vec3f WORLD_UP(0, 1, 0);					// World up axis (Y)
+const int PT_NB = 6;									// Number of input points (equals #tangents and #segments)
 const gmtl::Point3f input_pts[PT_NB] =
 {
 	gmtl::Point3f(-180, -25, 150),
@@ -53,30 +51,21 @@ const gmtl::Point3f input_pts[PT_NB] =
 };
 
 gmtl::Matrix44f MMAT;                                 // Basis matrix for Hermite curve form (const)
-
 const float R_MAX = 2.5f*1200.0f;                     // Expected maximum magnitude of local rightward component of plane's acceleration
-
 const int PARTICLE_NB = 40;                    		  // Number of particles
-
 const float VMAG_MEAN = 100.0f;                       // Velocity
 const float VMAG_STD = 25.0f;
 const float VDIR_STD = 0.25f;
-
 const int TTL_BASE = 200;                          // Time to live
 const int TTL_OFFSET = 50;
-
 const float SMOKE_SIZE = 1;                         // Smoke size
-
 const float S_TSTEP = 0.001f;                          // Simulation time step (for particle update)
-
 const gmtl::Vec3f GRAVITY(0, -100.0f, 0);                 // w.r.t. world, can be upward for smoke
-
 const gmtl::Vec3f V_WIND(100, 0, 0);                  // Wind velocity and drag coefficient (K)
 const float K_COEF = 1.0f;
 
 // Keyboard modifiers
 enum KeyModifier { KM_SHIFT = 0, KM_CTRL, KM_ALT };
-
 const float ROT_AMOUNT = gmtl::Math::deg2Rad(1.0f);
 const float COSTHETA = cos(ROT_AMOUNT);
 gmtl::Matrix44f yrotp_mat;
@@ -85,67 +74,57 @@ const float P_WIDTH = 3;
 const float P_LENGTH = 3;
 const float P_HEIGHT = 1.5f;
 
-/*___________________
-|
-| Type Definitions
-|__________________*/
 
+// Type Definitions
 // Particle structure storing position, velocity, and other properties
 typedef struct _MyParticle {
-	gmtl::Point3f p;      // Position
-	gmtl::Vec3f v;        // Velocity
-	float m;              // Mass
-	int ttl;              // Time to live, decremented each iteration
-	int ttl_init;	  			// Initial ttl, used to fade color as the age increases
+	gmtl::Point3f p;					// Position
+	gmtl::Vec3f v;						// Velocity
+	float m;							// Mass
+	int ttl;							// Time to live, decremented each iteration
+	int ttl_init;	  					// Initial ttl, used to fade color as the age increases
 } MyParticle;
 
-/*___________________
-|
-| Global variables
-|__________________*/
+
+// Global variables
 
 // camera w.r.t. plane
 float distance = 100.0f;
-float elevation = -15.0f;                 // In degs
-float azimuth = 180.0f;                 // In degs
-
-										// Mouse & keyboard
+float elevation = -15.0f;
+float azimuth = 180.0f;
 int mx_prev = 0, my_prev = 0;
 bool mbuttons[3] = { false, false, false };
 bool kmodifiers[3] = { false, false, false };
 
-gmtl::Vec3f tangents[PT_NB];                          // Tangent at each input point
-float s_tan = 1.0f;                                   // A scaling factor for tangents
-
-gmtl::Matrix44f Cmats[PT_NB];                         // Coefficient matrix (C) for each Hermite curve segment (It's actually 4x3, ignore last column)
-
-gmtl::Matrix44f ppose;                                // The plane's pose
-gmtl::Matrix44f pposeadj;                             // Adjusted plane coordinate system that the (plane) camera will be attached to
-gmtl::Matrix44f pposeadj_inv;                         // Adjusted plane coordinate system (plane's camera is attached to this frame), inverted 
-int ps = 0;                                        // The segment in which the plane currently belongs
-float pt = 0;                                        // The current t-value for the plane 
-float pdt = 0.02f;                                    // delta_t for the plane
-
-MyParticle particles[PARTICLE_NB];    			          // Array of particles
-
+gmtl::Vec3f tangents[PT_NB];                        // Tangent at each input point
+float s_tan = 1.0f;                                 // A scaling factor for tangents
+gmtl::Matrix44f Cmats[PT_NB];                       // Coefficient matrix (C) for each Hermite curve segment (It's actually 4x3, ignore last column)
+gmtl::Matrix44f ppose;                              // The plane's pose
+gmtl::Matrix44f pposeadj;                           // Adjusted plane coordinate system that the (plane) camera will be attached to
+gmtl::Matrix44f pposeadj_inv;                       // Adjusted plane coordinate system (plane's camera is attached to this frame), inverted 
+int ps = 0;											// The segment in which the plane currently belongs
+float pt = 0;                                       // The current t-value for the plane 
+float pdt = 0.02f;                                  // delta_t for the plane
+MyParticle particles[PARTICLE_NB];    			    // Array of particles
 GLuint texture;
+
+
 
 // Rendering option
 bool render_curve = true;
 bool render_constraint = false;
 gmtl::Point4f light_pos(5.0, 20.0, 200.0, 1.0);
 bool is_diffuse_on = true;
-
 enum TextureID { TID_SKYBACK, TID_SKYBACK_2, TID_SKYLEFT, TID_SKYBOTTOM, TID_SKYTOP, TID_SKYRIGHT, TID_SKYFRONT, TEXTURE_NB };  // Texture IDs, with the last ID indicating the total number of textures
 const GLfloat NO_LIGHT[] = { 0.0, 0.0, 0.0, 1.0 };
 const GLfloat AMBIENT_LIGHT[] = { 0.9, 0.9, 0.9, 1.0 };
 const GLfloat DIFFUSE_LIGHT[] = { 3.0, 3.0, 3.0, 3.0 };
 const GLfloat SPECULAR_LIGHT[] = { 0.5, 0.5, 0.5, 1.0 };
-GLuint textures[TEXTURE_NB];                           // Textures
+GLuint textures[TEXTURE_NB];                       // Textures
 const float SB_SIZE = 1100.0f;                     // Skybox dimension
 
 
-												   // Materials
+// Materials
 const GLfloat DARKRED_COL[] = { 0.1, 0.0, 0.0, 1.0 };
 const GLfloat BRIGHTRED_COL[] = { 0.7, 0.0, 0.0, 1.0 };
 const GLfloat DARKBLUE_COL[] = { 0.0, 0.0, 0.1, 1.0 };
@@ -163,10 +142,8 @@ const GLfloat DARKBROWN_COL[] = { 0.4, 0.05, 0.0, 1.0 };
 const GLfloat BRIGHTBROWN2_COL[] = { 0.55, 0.25, 0.0, 1.0 };
 const GLfloat DARKBROWN2_COL[] = { 0.05, 0.01, 0.0, 1.0 };
 
-/*___________________
-|
-| Function Prototypes
-|__________________*/
+
+// Function Prototypes
 
 void Init();
 void Init_AParticle(MyParticle &par);
@@ -186,23 +163,14 @@ void Draw_Rocket();
 void Draw_Particles();
 float FastGauss(float mean, float std);
 void LoadPPM(char *fname, unsigned int *w, unsigned int *h, unsigned char **data, int mallocflag);
-
 void DrawBroom(const float width, const float length, const float height);
 void DrawCatHead(const float width, const float length, const float height);
 void DrawCurcle(const float width, const float length, const float height);
-
 void SetLight(const gmtl::Point4f &pos, const bool is_ambient, const bool is_diffuse, const bool is_specular);
-
 void DrawSkybox(const float s);
 
-/*____________________________________________________________________
-|
-| Function: main
-|
-| Input:
-| Output: Program entry point.
-|___________________________________________________________________*/
 
+// Function: main
 int main(int argc, char **argv)
 {
 	glutInit(&argc, argv);
@@ -218,20 +186,13 @@ int main(int argc, char **argv)
 	glutMotionFunc(Motion_Func);
 
 	Init();
-
 	glutMainLoop();
 
 	return 0;
 }
 
-/*____________________________________________________________________
-|
-| Function: Init
-|
-| Input:
-| Output: Initialization routine.
-|___________________________________________________________________*/
 
+// Function: Init
 void Init()
 {
 	int i;
@@ -296,14 +257,8 @@ void Init()
 	//       during drawing, use glBindTexture() to select.
 }
 
-/*____________________________________________________________________
-|
-| Function: Init_AParticle
-|
-| Input:
-| Output: Init a single particle.
-|___________________________________________________________________*/
 
+// Function: Init_AParticle
 void Init_AParticle(MyParticle &par)
 {
 	gmtl::Vec3f v_dir;
@@ -332,7 +287,6 @@ void Init_AParticle(MyParticle &par)
 	unsigned char *img_data;               // Texture image data
 	unsigned int  width;                   // Texture width
 	unsigned int  height;                  // Texture height
-
 
 	char skyBack[50] = "skybox_back.ppm";
 	char skyBack2[50] = "skybox_back_2.ppm";
